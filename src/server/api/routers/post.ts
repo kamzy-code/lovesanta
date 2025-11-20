@@ -232,7 +232,7 @@ export const postRouter = createTRPCRouter({
         },
       });
 
-      console.log({ withExistingEvent })
+      console.log({ withExistingEvent });
 
       if (withExistingEvent) {
         await ctx.db.participant.update({
@@ -262,4 +262,14 @@ export const postRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
+
+  updatePasscode: protectedProcedure
+    .input(z.object({ passcode: z.string().min(6) }))
+    .mutation(async ({ ctx, input }) => {
+
+      return await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: {passcode: input.passcode}
+      });
+    }),
 });

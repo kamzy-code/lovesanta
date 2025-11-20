@@ -14,7 +14,9 @@ import { WishlistCard } from "./profile-wishlist-card";
 import { db } from "~/server/db";
 import { auth } from "~/server/auth";
 import { Avatar } from "~/components/ui/avatar";
-import { PinInput } from "~/components/ui/pin-input";
+import { ProfilePasscodeCard } from "./profile-passcode-card";
+
+
 
 export const ProfileSettingComponent = async () => {
   const session = await auth();
@@ -24,6 +26,7 @@ export const ProfileSettingComponent = async () => {
       id: session?.user?.id,
     },
   });
+
 
   if (!profile) {
     return <div>You are not logged in</div>;
@@ -75,25 +78,7 @@ export const ProfileSettingComponent = async () => {
                   Change your passcode
                 </Text>
               </HStack>
-              <VStack
-                pt={3}
-                px={1}
-                w={"full"}
-                colorPalette="gray"
-                borderColor={"fg.subtle"}
-              >
-                <PinInput
-                  w={"full"}
-                  count={6}
-                  size="md"
-                  spaceX={0.5}
-                  fontSize={"16px"}
-                  placeholder=""
-                />
-                <Button w={"full"} size="xs" variant="outline">
-                  Change passcode
-                </Button>
-              </VStack>
+             <ProfilePasscodeCard/>
             </Stack>
           </ConfigPanel>
 
