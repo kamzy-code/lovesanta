@@ -54,6 +54,7 @@ export const authConfig = {
         console.log({ req, from: "[credentials config]" });
         try {
           const { username, passcode } = credentials;
+          console.log(username, passcode)
           const user = await db.user.findFirst({
             where: {
               username: String(username).toLowerCase(),
