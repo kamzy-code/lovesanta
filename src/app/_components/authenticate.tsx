@@ -34,7 +34,7 @@ export const AuthenticateStack = () => {
    * redirecting the user to the home page.
    */
   const session = useSession();
-  if (session?.data && session?.data.user) {
+  if (session?.data?.user) {
     redirect(routes.home);
   }
 

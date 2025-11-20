@@ -229,7 +229,7 @@ export async function rematchParticipant({
     });
   }
 
-  const receiver = getRandomNode(availableReceivers) as Participant;
+  const receiver = getRandomNode(availableReceivers)!;
 
   /**
    *

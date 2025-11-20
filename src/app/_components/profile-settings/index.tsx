@@ -1,11 +1,9 @@
 import {
-  Button,
   Container,
   HStack,
   Icon,
   Stack,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { LuAtSign, LuUserCog } from "react-icons/lu";
 import { SiGoogle } from "react-icons/si";
