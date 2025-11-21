@@ -19,9 +19,16 @@ export default async function Home() {
    * And in the future only show events the user already joined instead of pulling
    * all events from the db
    */
-  const dbEvents = await db.event.findMany({});
+  const dbEvents = await db.event.findMany({
+    include: {
+      participants: true,
+    },
+  });
 
-  const feed = [...events, ...dbEvents].sort((a, b) => {
+  const feed = [
+    ...events,
+    ...dbEvents.map((p) => ({ ...p, participants: p.participants.length })),
+  ].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   }) as Event[];
 
