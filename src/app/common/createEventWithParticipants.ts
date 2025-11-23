@@ -78,6 +78,7 @@ async function createEventPayload(eventId: string, createdUsers: User[]) {
     userId: user.id,
     wishlist: user.bio,
     region: user.region,
+    category: user.category,
     budget: 100,
     hasJoined: true,
   }));

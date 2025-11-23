@@ -66,6 +66,7 @@ export async function matchParticipant({
       where: {
         eventId,
         region: participant.region,
+        category: participant.category,
         NOT: { id: participant.id },
       },
       include: {

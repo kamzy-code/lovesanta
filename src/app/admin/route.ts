@@ -14,13 +14,14 @@ const event = {
   status: "ACTIVE" as "ACTIVE" | "ENDED" | "UPCOMING",
 };
 
-const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
+const users: Pick<User, "name" | "username" | "passcode" | "region" | "category" | "bio">[] =
   [
     {
       name: "Stella",
       passcode: "100001",
       username: "Stella",
       region: "Africa",
+      category: "adult",
       bio: "Hoping for a new laptop this Christmas!",
     },
     {
@@ -28,6 +29,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100002",
       username: "Chikezie",
       region: "Africa",
+      category: "adult",
       bio: "A good book collection and a cozy blanket are on my list.",
     },
     {
@@ -35,6 +37,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100003",
       username: "Sharon",
       region: "Africa",
+      category: "adult",
       bio: "I wish for noise-canceling headphones this year.",
     },
     {
@@ -42,6 +45,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100004",
       username: "Mkpurouma",
       region: "Africa",
+      category: "adult",
       bio: "A subscription to a coding course would be perfect!",
     },
     {
@@ -49,6 +53,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100005",
       username: "Bukky",
       region: "Africa",
+      category: "adult",
       bio: "Just peace and maybe some art supplies, please.",
     },
     {
@@ -56,6 +61,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100006",
       username: "Joy",
       region: "Africa",
+      category: "adult",
       bio: "A new pair of running shoes would bring me joy.",
     },
     {
@@ -63,6 +69,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100007",
       username: "Uchechi",
       region: "Africa",
+      category: "adult",
       bio: "A comfortable ergonomic chair for my workspace.",
     },
     {
@@ -70,6 +77,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100008",
       username: "Ezinne",
       region: "Africa",
+      category: "adult",
       bio: "I'd love a high-quality camera lens for my travels.",
     },
     {
@@ -77,20 +85,23 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100009",
       username: "Winner",
       region: "Africa",
+      category: "adult",
       bio: "A new smart watch is all I really want.",
     },
     {
       name: "Ruth",
       passcode: "100010",
       username: "Ruth",
-      region: "Africa",
+      region: "America",
+      category: "adult",
       bio: "I'm wishing for a weekend getaway trip.",
     },
     {
       name: "Amarachi",
       passcode: "100011",
       username: "Amarachi",
-      region: "Africa",
+      region: "America",
+      category: "adult",
       bio: "New set of kitchen gadgets to practice cooking.",
     },
     {
@@ -98,6 +109,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100012",
       username: "Princess",
       region: "Africa",
+      category: "adult",
       bio: "A fancy handbag and some perfume would be lovely.",
     },
     {
@@ -105,6 +117,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100013",
       username: "Prince",
       region: "Africa",
+      category: "adult",
       bio: "A new gaming console or a graphics card upgrade.",
     },
     {
@@ -112,6 +125,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100014",
       username: "Chinedu",
       region: "Africa",
+      category: "adult",
       bio: "A nice leather journal for writing my thoughts.",
     },
     {
@@ -119,6 +133,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100015",
       username: "Stephanie",
       region: "Africa",
+      category: "adult",
       bio: "A tablet for reading and sketching in my spare time.",
     },
     {
@@ -126,6 +141,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100016",
       username: "Chibueze",
       region: "Africa",
+      category: "kids",
       bio: "A drone for capturing amazing aerial photos.",
     },
     {
@@ -133,6 +149,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100017",
       username: "Chiwenmeri",
       region: "Africa",
+      category: "kids",
       bio: "I hope for comfortable new pajamas and slippers.",
     },
     {
@@ -140,6 +157,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100018",
       username: "Melody",
       region: "Africa",
+      category: "kids",
       bio: "A musical instrument (ukulele or keyboard) is my wish.",
     },
     {
@@ -147,6 +165,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100019",
       username: "Divine",
       region: "Africa",
+      category: "adult",
       bio: "A new pair of high-quality sunglasses.",
     },
     {
@@ -154,6 +173,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100020",
       username: "Chisom",
       region: "Africa",
+      category: "kids",
       bio: "A nice portable Bluetooth speaker for music.",
     },
     {
@@ -161,6 +181,7 @@ const users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[] =
       passcode: "100021",
       username: "Treasure",
       region: "Africa",
+      category: "kids",
       bio: "A set of cozy candles and a weighted blanket.",
     },
   ];
