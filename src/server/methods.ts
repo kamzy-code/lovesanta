@@ -65,7 +65,7 @@ export async function matchParticipant({
     const participants = await prisma.participant.findMany({
       where: {
         eventId,
-        region: participant.region,
+        // region: participant.region,
         category: participant.category,
         NOT: { id: participant.id },
       },
