@@ -187,7 +187,7 @@ export async function rematchParticipant({
   const availableReceivers = await prisma.participant.findMany({
     where: {
       eventId,
-      region: participant.region,
+      category: participant.category,
       NOT: {
         OR: [{ id: participant.id }, { userId: { in: previousReceivers } }],
       },
