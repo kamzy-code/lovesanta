@@ -14,17 +14,6 @@ datasource db {
   // url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdBy   User   @relation(fields: [createdById], references: [id])
-  createdById String
-
-  @@index([name])
-}
 
 enum EventStatus {
   ACTIVE
@@ -134,13 +123,12 @@ model Session {
 
 model User {
   id            String        @id @default(cuid())
-  name          String?
-  username      String?       @unique
-  passcode      String?
+  firstName          String?
+  lastName       String?
+  password      String?
+  gender        String?
   email         String?       @unique
   emailVerified DateTime?
-  region        String        @default("africa") // africa, world, europe, asia
-  category      String        @default("adult")
   /// @param loginCount - This is a hack we increment upon login
   /// For now we created this to help with the pin reset process, bcos
   /// We manually register our users with the same pin directly from the database
@@ -151,7 +139,6 @@ model User {
   bio           String?
   accounts      Account[]
   sessions      Session[]
-  posts         Post[]
   participants  Participant[]
 
   /// @param matchHistory - Where a user has been matched as a receiver
