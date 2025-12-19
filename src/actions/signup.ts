@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { get } from "~/app/common/getFromFormData";
 import { db } from "~/server/db";
+import bcrypt from "bcryptjs";
 
 const signupSchema = z
   .object({
@@ -88,7 +89,7 @@ export async function SignupAction(
   if (existingUser) {
     errors.email = "An account with this email already exists.";
   }
-
+  console.log({values, errors})
   if (Object.keys(errors).length > 0) {
     const response: SignupFormState = {
       success: false,
@@ -98,6 +99,8 @@ export async function SignupAction(
     return response;
   }
 
+  const hashedPasswod = await bcrypt.hash(values.password, 10);
+
   try {
     await db.user.create({
       data:{
@@ -105,7 +108,7 @@ export async function SignupAction(
         lastName: values.lastName,
         email: values.email,
         gender: values.gender,
-        password: values.password
+        password: hashedPasswod
       }
     })
   } catch (error) {
