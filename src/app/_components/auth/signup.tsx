@@ -1,11 +1,8 @@
 import {
-  Box,
   Container,
   VStack,
-  HStack,
   Stack,
   Heading,
-  Input,
   Link,
   Text,
 } from "@chakra-ui/react";
@@ -25,13 +22,6 @@ export function SignupStack() {
         </VStack>
 
         <SignupForm />
-
-        <Text color={"fg.muted"} textAlign={'center'} textStyle={'sm'} >
-          Already have an account?{" "}
-          <Link variant={"underline"} href="/auth/login">
-            Login
-          </Link>
-        </Text>
       </Stack>
     </Container>
   );
