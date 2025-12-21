@@ -141,16 +141,13 @@ const {
      */
     async session({ token, session, user }) {
       console.log({ session, token, user, from: "[session callback]" });
-      // return {
-      //   ...session,
-      //   user: {
-      //     ...session.user,
-      //     id: user.id,
-      //   },
-      // };
 
       if (token.sub && session.user) {
         session.user.id = token.sub;
+      }
+
+      if (token.role && session.user) {
+        session.user.role = token.role;
       }
       return session;
     },
