@@ -13,12 +13,12 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const bricolage = Bricolage_Grotesque({
-  weight: ["400", "500", "600"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-bricolage",
-});
+// const bricolage = Bricolage_Grotesque({
+//   weight: ["400", "500", "600"],
+//   subsets: ["latin"],
+//   display: "swap",
+//   variable: "--font-bricolage",
+// });
 
 export default async function RootLayout({
   children,
@@ -32,7 +32,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${bricolage.className} `}
+      // className={`${bricolage.variable} ${bricolage.className} `}
       suppressHydrationWarning
     >
       <body>
