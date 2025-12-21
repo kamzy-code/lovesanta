@@ -72,8 +72,6 @@ export async function LoginAction(
         errors: { ...errors },
         values,
       };
-
-      console.log({error: error.name, type: error.type, from: "LoginAction"});
       switch (error.type) {
         case "CredentialsSignin":
           if (response.errors)
