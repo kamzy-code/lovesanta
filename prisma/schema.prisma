@@ -14,11 +14,15 @@ datasource db {
   // url      = env("DATABASE_URL")
 }
 
-
 enum EventStatus {
   ACTIVE
   ENDED
   UPCOMING
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }
 
 model Event {
@@ -123,8 +127,8 @@ model Session {
 
 model User {
   id            String        @id @default(cuid())
-  firstName          String?
-  lastName       String?
+  firstName     String?
+  lastName      String?
   password      String?
   gender        String?
   email         String?       @unique
@@ -134,6 +138,7 @@ model User {
   /// We manually register our users with the same pin directly from the database
   loginCount    Int           @default(0)
   image         String?
+  role          UserRole      @default(USER)
   /// @param bio - a string users can use to write their wishlist
   /// during event participation, we simply copy bio into participant.wishlist
   bio           String?

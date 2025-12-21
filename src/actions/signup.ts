@@ -1,36 +1,9 @@
 "use server";
-import { z } from "zod";
 import { get } from "~/app/common/getFromFormData";
 import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
-
-const signupSchema = z
-  .object({
-    firstName: z
-      .string()
-      .min(1, "First name is required")
-      .max(50, "First name is too long"),
-    lastName: z
-      .string()
-      .min(1, "Last name is required")
-      .max(50, "Last name is too long"),
-    email: z
-      .string()
-      .min(1, "Email is required")
-      .email("Invalid email address"),
-    gender: z.string().min(1, "Please select a gender"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-      });
-    }
-  });
+import { getUserByEmail } from "~/lib/db/users";
+import { signupSchema } from "~/schemas";
 
 export interface SignupFormValue {
   firstName: string;
@@ -80,16 +53,12 @@ export async function SignupAction(
     });
   }
 
-  const existingUser = await db.user.findUnique({
-    where: {
-      email: values.email,
-    },
-  });
+  const existingUser = await getUserByEmail(values.email);
 
   if (existingUser) {
     errors.email = "An account with this email already exists.";
   }
-  console.log({values, errors})
+
   if (Object.keys(errors).length > 0) {
     const response: SignupFormState = {
       success: false,
@@ -103,14 +72,14 @@ export async function SignupAction(
 
   try {
     await db.user.create({
-      data:{
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
+      data: {
+        firstName: values.firstName.toLowerCase().trim(),
+        lastName: values.lastName.toLowerCase().trim(),
+        email: values.email.toLowerCase().trim(),
         gender: values.gender,
-        password: hashedPasswod
-      }
-    })
+        password: hashedPasswod,
+      },
+    });
   } catch (error) {
     return {
       success: false,
@@ -119,8 +88,7 @@ export async function SignupAction(
           "An account with this email already exists. Please use a different email.",
       },
       values,
-    }
-    
+    };
   }
-  return { success: true, errors: {}, values: {} };
+  return { success: true, errors: {}, values: {} } as SignupFormState;
 }
