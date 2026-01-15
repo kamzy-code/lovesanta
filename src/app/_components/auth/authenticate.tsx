@@ -23,8 +23,10 @@ import { routes } from "../../common/routes";
 import Form from "next/form";
 import { LoginAction, type LoginFormState } from "~/actions/login";
 import { useActionState, useState } from "react";
-import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
-
+import { FaGoogle, FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import { GoogleSignInButton } from "./googleLogin";
+import { useSearchParams } from "next/navigation";
+import { error } from "console";
 
 export const AuthenticateStack = () => {
   /**
@@ -50,6 +52,8 @@ export const AuthenticateStack = () => {
 
         <CredentialForm />
 
+        <GoogleSignInButton></GoogleSignInButton>
+
         <Text textStyle="sm" color="fg.muted" textAlign="center">
           {`Don't have an account?`}{" "}
           <Link variant="underline" href="/auth/signup">
@@ -73,6 +77,8 @@ export const CredentialForm = () => {
   );
 
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const LoginError = searchParams.get("error");
 
   return (
     <Form action={formAction}>
@@ -132,7 +138,17 @@ export const CredentialForm = () => {
             Sign in <LuArrowRight />
           </Button>
 
-          {newFormState.errors?.submitError && <Text color={'red.500'} fontSize={'sm'}>{newFormState.errors.submitError}</Text>}
+          {newFormState.errors?.submitError && (
+            <Text color={"red.500"} fontSize={"sm"}>
+              {newFormState.errors.submitError}
+            </Text>
+          )}
+
+          {LoginError &&(
+            <Text color={"red.500"} fontSize={"sm"}>
+              Something went wrong. Please try again.
+            </Text>
+          )}
         </Stack>
       </Stack>
     </Form>

@@ -10,6 +10,25 @@ import { getUserByEmail, getUserById } from "~/lib/db/users";
 import bcrypt from "bcryptjs";
 
 const adapter = PrismaAdapter(db);
+
+// Override the createUser method to handle name -> firstName/lastName mapping
+const customAdapter = {
+  ...adapter,
+  createUser: async (data: any) => {
+    // Split name into firstName and lastName if present
+    const { name, ...rest } = data;
+    if (name) {
+      const nameParts = name.split(" ");
+      return adapter.createUser!({
+        ...rest,
+        lastName: nameParts[0],
+        firstName: nameParts.slice(1).join(" ") || undefined,
+      });
+    }
+    return adapter.createUser!(rest);
+  },
+};
+
 const {
   auth: uncachedAuth,
   handlers,
@@ -63,7 +82,7 @@ const {
       },
     }),
   ],
-  adapter: adapter,
+  adapter: customAdapter,
   session: { strategy: "jwt" },
   events: {
     /**
@@ -83,6 +102,15 @@ const {
           },
         });
       }
+    },
+
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
     },
   },
 

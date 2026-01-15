@@ -15,6 +15,7 @@ import {
 import { Field } from "~/components/ui/field";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { LuArrowRight } from "react-icons/lu";
+import { GoogleSignInButton } from "./googleLogin";
 
 export const SignupForm = () => {
   const initialFormState: SignupFormState = {
@@ -86,7 +87,7 @@ export const SignupForm = () => {
             />
           </Field>
 
-          <Field
+          {/* <Field
             label="Gender"
             errorText={newFormState.errors?.gender}
             invalid={!!newFormState.errors?.gender}
@@ -102,7 +103,7 @@ export const SignupForm = () => {
               </NativeSelect.Field>
               <NativeSelect.Indicator />
             </NativeSelect.Root>
-          </Field>
+          </Field> */}
 
           <Field
             label="Password"
@@ -158,6 +159,8 @@ export const SignupForm = () => {
           <Text color="red.500" textAlign="center">
             {newFormState.errors?.submitError}
           </Text>
+
+           <GoogleSignInButton></GoogleSignInButton>
 
           <Text color={"fg.muted"} textAlign={"center"} textStyle={"sm"}>
             Already have an account?{" "}

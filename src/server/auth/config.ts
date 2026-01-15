@@ -1,5 +1,6 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
 import { UserRole } from "@prisma/client";
 
@@ -43,9 +44,11 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: "/auth/login",
+    error: "/auth/login",
   },
   providers: [
     DiscordProvider,
+    GoogleProvider,
     /**
      * ...add more providers here.
      *

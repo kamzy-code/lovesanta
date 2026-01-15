@@ -9,7 +9,6 @@ export interface SignupFormValue {
   firstName: string;
   lastName: string;
   email: string;
-  gender: string;
   password: string;
   confirmPassword: string;
 }
@@ -34,7 +33,6 @@ export async function SignupAction(
     firstName: get("firstName", formData),
     lastName: get("lastName", formData),
     email: get("email", formData),
-    gender: get("gender", formData),
     password: get("password", formData),
     confirmPassword: get("confirmPassword", formData),
   };
@@ -76,7 +74,6 @@ export async function SignupAction(
         firstName: values.firstName.toLowerCase().trim(),
         lastName: values.lastName.toLowerCase().trim(),
         email: values.email.toLowerCase().trim(),
-        gender: values.gender,
         password: hashedPasswod,
       },
     });

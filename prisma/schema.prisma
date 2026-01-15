@@ -130,7 +130,7 @@ model User {
   firstName     String?
   lastName      String?
   password      String?
-  gender        String?
+  // gender        String?
   email         String?       @unique
   emailVerified DateTime?
   /// @param loginCount - This is a hack we increment upon login
@@ -141,7 +141,7 @@ model User {
   role          UserRole      @default(USER)
   /// @param bio - a string users can use to write their wishlist
   /// during event participation, we simply copy bio into participant.wishlist
-  bio           String?
+  // bio           String?
   accounts      Account[]
   sessions      Session[]
   participants  Participant[]

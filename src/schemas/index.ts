@@ -23,7 +23,6 @@ export const signupSchema = z
       .string()
       .min(1, "Email is required")
       .email("Invalid email address"),
-    gender: z.string().min(1, "Please select a gender"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
