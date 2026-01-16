@@ -136,19 +136,6 @@ const {
      */
 
     async jwt({ token, user, account }) {
-      // if (account?.provider === "credentials") {
-      //   const expires = new Date(Date.now() + 60 * 60 * 24 * 30 * 1000);
-      //   const sessionToken = nanoid(24);
-
-      //   const session = await adapter.createSession!({
-      //     userId: user.id!,
-      //     sessionToken,
-      //     expires,
-      //   });
-
-      //   token.sessionId = session.sessionToken;
-      // }
-
       console.log({ token, user, account, from: "[jwt callback]" });
 
       if (!token.sub) return token;
@@ -178,6 +165,19 @@ const {
         session.user.role = token.role;
       }
       return session;
+    },
+
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") return true;
+
+      const existingUser = await getUserById(user.id!);
+
+      // prevent signin without email verification
+      if (!existingUser?.emailVerified) return false;
+
+      //TODO: Add 2FA Check
+
+      return true;
     },
   },
 });

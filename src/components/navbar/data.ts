@@ -4,7 +4,7 @@ import {
   LuLayoutDashboard,
   LuSettings,
 } from "react-icons/lu";
-import { routes } from "~/app/common/routes";
+import { routes } from "~/lib/common/routes";
 
 export const items = [
   {

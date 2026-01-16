@@ -1,9 +1,11 @@
 "use server";
-import { get } from "~/app/common/getFromFormData";
+import { get } from "~/lib/common/getFromFormData";
 import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "~/lib/db/users";
 import { signupSchema } from "~/schemas";
+import { generateVerificationToken } from "~/lib/common/verificationToken";
+import { sendVerificationTokenMail } from "~/lib/common/sendMail";
 
 export interface SignupFormValue {
   firstName: string;
@@ -77,12 +79,16 @@ export async function SignupAction(
         password: hashedPasswod,
       },
     });
+
+    const verificationToken = await generateVerificationToken(values.email);
+    //Send Email
+    await sendVerificationTokenMail(verificationToken.identifier, verificationToken.token)
   } catch (error) {
     return {
       success: false,
       errors: {
         submitError:
-          "An account with this email already exists. Please use a different email.",
+          "Something went worng, Please check your internet and try again.",
       },
       values,
     };

@@ -1,6 +1,6 @@
 import { type Participant, type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { getRandomNode } from "~/app/common/helpers";
+import { getRandomNode } from "~/lib/common/helpers";
 
 interface MatchParticipantOptions {
   prisma: PrismaClient;

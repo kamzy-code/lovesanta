@@ -1,7 +1,10 @@
 "use server";
 import { AuthError } from "next-auth";
 import { DEFAULT_LOGIN_REDIRECT } from "routes";
-import { get } from "~/app/common/getFromFormData";
+import { get } from "~/lib/common/getFromFormData";
+import { sendVerificationTokenMail } from "~/lib/common/sendMail";
+import { generateVerificationToken } from "~/lib/common/verificationToken";
+import { getUserByEmail } from "~/lib/db/users";
 import { loginSchema } from "~/schemas";
 import { signIn } from "~/server/auth/index";
 
@@ -58,6 +61,37 @@ export async function LoginAction(
 
   const { email, password, rememberMe } = result.data!;
 
+  const existingUser = await getUserByEmail(email);
+
+  if (!existingUser?.email || !existingUser.password) {
+    errors.submitError = "Email does not exist.";
+    const response: LoginFormState = {
+      success: false,
+      errors,
+      values,
+    };
+    return response;
+  }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email,
+    );
+
+    await sendVerificationTokenMail(
+      verificationToken.identifier,
+      verificationToken.token,
+    );
+    return {
+      success: false,
+      errors: {
+        submitError:
+          "A new verification email has been sent to you. Please verify your email to log in.",
+      },
+      values,
+    };
+  }
+
   try {
     await signIn("credentials", {
       email,
@@ -80,7 +114,7 @@ export async function LoginAction(
         default:
           if (response.errors)
             response.errors.submitError =
-              "An unknown error occurred. Please try again.";
+              "An unknown error occurred. Please check your internet and try again..";
           return response;
       }
     }

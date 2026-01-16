@@ -35,8 +35,8 @@ export const SignupForm = () => {
       {newFormState.success ? (
         <VStack textAlign={"center"} gap={4}>
           <Text>
-            Your account has been created successfully. You can now log in using
-            your credentials.
+            Your account has been created successfully. A verification email has
+            been sent to your email address. Please verify your email to log in.
           </Text>
 
           <Link href="/auth/login">
@@ -160,7 +160,7 @@ export const SignupForm = () => {
             {newFormState.errors?.submitError}
           </Text>
 
-           <GoogleSignInButton></GoogleSignInButton>
+          <GoogleSignInButton></GoogleSignInButton>
 
           <Text color={"fg.muted"} textAlign={"center"} textStyle={"sm"}>
             Already have an account?{" "}

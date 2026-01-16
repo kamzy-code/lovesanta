@@ -19,7 +19,7 @@ import { LuArrowRight } from "react-icons/lu";
 import { useForm } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { routes } from "../../common/routes";
+import { routes } from "../../../lib/common/routes";
 import Form from "next/form";
 import { LoginAction, type LoginFormState } from "~/actions/login";
 import { useActionState, useState } from "react";
@@ -52,7 +52,7 @@ export const AuthenticateStack = () => {
 
         <CredentialForm />
 
-        <GoogleSignInButton></GoogleSignInButton>
+       
 
         <Text textStyle="sm" color="fg.muted" textAlign="center">
           {`Don't have an account?`}{" "}
@@ -146,9 +146,11 @@ export const CredentialForm = () => {
 
           {LoginError &&(
             <Text color={"red.500"} fontSize={"sm"}>
-              Something went wrong. Please try again.
+              Something went wrong. Please check your internet and try again.
             </Text>
           )}
+
+           <GoogleSignInButton></GoogleSignInButton>
         </Stack>
       </Stack>
     </Form>

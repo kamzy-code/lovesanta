@@ -48,7 +48,9 @@ export const authConfig = {
   },
   providers: [
     DiscordProvider,
-    GoogleProvider,
+    GoogleProvider({
+      allowDangerousEmailAccountLinking: true,
+    }),
     /**
      * ...add more providers here.
      *

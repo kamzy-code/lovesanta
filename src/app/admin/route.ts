@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
 import { type User, type EventStatus } from "@prisma/client";
-import { CreateEventAndEnrollParticipans } from "../common/createEventWithParticipants";
+import { CreateEventAndEnrollParticipans } from "../../lib/common/createEventWithParticipants";
 // import {
 //   demoUsers as users,
 //   // users

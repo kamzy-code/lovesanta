@@ -19,7 +19,7 @@ import { LuArrowRight } from "react-icons/lu";
 import { useForm } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { routes } from "../common/routes";
+import { routes } from "../../lib/common/routes";
 
 interface FormValues {
   username: string;

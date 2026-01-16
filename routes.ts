@@ -3,7 +3,7 @@
  * @type {string[]}
  */
 
-export const publicRoutes = ["/", "/demo"];
+export const publicRoutes = ["/", "/demo", "/auth/verify-email"];
 
 /**
  * An array of routes that are used for authentication.
@@ -18,6 +18,14 @@ export const authRoutes = ["/auth/login", "/auth/signup"];
  * @type {string}
  */
 export const apiAuthPrefix = "/api/auth";
+
+/**
+ * The prefix for API authentication routes.
+ * Routes that start with this prefix are handled by Auth.js. and used for Authentication.
+ * @type {string}
+ */
+export const baseURL = "http://localhost:3000";
+
 
 /**
  * The default redirect path after logging in

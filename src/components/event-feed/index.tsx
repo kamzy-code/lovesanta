@@ -11,7 +11,7 @@ import {
 import { Status } from "~/components/ui/status";
 import { type Event } from "./_data";
 import { LuChevronRight, LuUser } from "react-icons/lu";
-import { calculateDaysAgo } from "~/app/common/helpers";
+import { calculateDaysAgo } from "~/lib/common/helpers";
 import Link from "next/link";
 
 type EventFeedComponentProps = {

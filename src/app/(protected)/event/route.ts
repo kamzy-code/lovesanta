@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { routes } from "~/app/common/routes";
+import { routes } from "~/lib/common/routes";
 import { db } from "~/server/db";
 
 export async function GET() {
