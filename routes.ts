@@ -10,7 +10,7 @@ export const publicRoutes = ["/", "/demo", "/auth/verify-email"];
  * These routes will redirect logged in users to /home
  * @type {string[]}
  */
-export const authRoutes = ["/auth/login", "/auth/signup"];
+export const authRoutes = ["/auth/login", "/auth/signup",'/auth/reset-password', "/auth/new-password"];
 
 /**
  * The prefix for API authentication routes.

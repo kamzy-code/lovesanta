@@ -4,7 +4,7 @@ import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "~/lib/db/users";
 import { signupSchema } from "~/schemas";
-import { generateVerificationToken } from "~/lib/common/verificationToken";
+import { generateVerificationToken } from "~/lib/common/token";
 import { sendVerificationTokenMail } from "~/lib/common/sendMail";
 
 export interface SignupFormValue {

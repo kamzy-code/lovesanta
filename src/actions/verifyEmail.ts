@@ -1,7 +1,7 @@
 "use server";
 
 import { sendVerificationTokenMail } from "~/lib/common/sendMail";
-import { generateVerificationToken } from "~/lib/common/verificationToken";
+import { generateVerificationToken } from "~/lib/common/token";
 import { getUserByEmail } from "~/lib/db/users";
 import { getVerificationTokenByToken } from "~/lib/db/verificationToken";
 import { db } from "~/server/db";
@@ -17,10 +17,10 @@ export async function verifyEmail(token: string) {
 
   console.log("hasExpired", hasExpired);
   if (hasExpired) {
-    // const newToken = await generateVerificationToken(
-    //   verificationToken.identifier,
-    // );
-    // await sendVerificationTokenMail(newToken.identifier, newToken.token);
+    const newToken = await generateVerificationToken(
+      verificationToken.identifier,
+    );
+    await sendVerificationTokenMail(newToken.identifier, newToken.token);
     return {
       error: "Token has expired, a new token has been sent to your email.",
     };

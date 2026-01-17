@@ -128,7 +128,7 @@ export const CredentialForm = () => {
             <Checkbox defaultChecked name="rememberMe">
               Remember me
             </Checkbox>
-            <Link>
+            <Link href="/auth/reset-password">
               <Button variant="plain" size="sm">
                 Forgot password
               </Button>

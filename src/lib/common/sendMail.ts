@@ -3,7 +3,6 @@
 import { baseURL } from "routes";
 import { sendEmail } from "./mailTranspot";
 
-
 // VERIFICATION EMAIL AND HELPERS
 export const sendVerificationTokenMail = async (to: string, token: string) => {
   const subject = "Verify your email address";
@@ -116,5 +115,117 @@ If you didn’t create a Hangnex account, you can safely ignore this email.
 `.trim();
 }
 
+// RESET PASSWORD EMAIL AND HELPERS
+export const sendPasswordResetMail = async (to: string, token: string) => {
+  const subject = "Reset Your Passowrd";
+  const verificationURL = `${baseURL}/auth/new-password?token=${token}`;
 
-// NEXT EMAIL AND HELPERS GOES HERE
+  const html = resetPasswordEmailHTML(verificationURL);
+  const text = resetPasswordEmailText(verificationURL);
+
+  try {
+    await sendEmail(subject, text, to, html);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to verification email";
+    throw new Error(message || "Error sending verification email");
+  }
+};
+
+function resetPasswordEmailHTML(resetPasswordURL: string) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <body style="margin:0; padding:0; background-color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:480px; border:1px solid #e5e5e5;">
+            <tr>
+              <td style="padding:32px; color:#000000;">
+
+                <!-- Brand -->
+                <h1 style="margin:0 0 24px 0; font-size:20px; font-weight:600; text-align:center;">
+                  Hangnex
+                </h1>
+
+                <p style="margin:0 0 16px 0; font-size:14px; line-height:1.6;">
+                  We received a request to reset your password.
+                </p>
+
+                <p style="margin:0 0 24px 0; font-size:14px; line-height:1.6;">
+                  Click the button below to choose a new password. This link will expire shortly for security reasons.
+                </p>
+
+                <!-- Button -->
+                <table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:32px auto;">
+                  <tr>
+                    <td>
+                      <a
+                        href="${resetPasswordURL}"
+                        style="
+                          display:inline-block;
+                          padding:12px 24px;
+                          background-color:#000000;
+                          color:#ffffff;
+                          text-decoration:none;
+                          font-size:14px;
+                          font-weight:500;
+                          border:1px solid #000000;
+                        "
+                      >
+                        Reset Password
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0 0 8px 0; font-size:12px; color:#555555;">
+                  Or copy and paste this link into your browser:
+                </p>
+
+                <p style="margin:0 0 24px 0; font-size:12px; word-break:break-all;">
+                  <a href="${resetPasswordURL}" style="color:#000000;">
+                    ${resetPasswordURL}
+                  </a>
+                </p>
+
+                <hr style="border:none; border-top:1px solid #e5e5e5; margin:32px 0;" />
+
+                <p style="margin:0; font-size:12px; color:#777777; line-height:1.6;">
+                  If you didn’t request a password reset, you can safely ignore this email. Your password will remain unchanged.
+                </p>
+
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin-top:16px; font-size:11px; color:#999999;">
+            © ${new Date().getFullYear()} Hangnex
+          </p>
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;
+}
+
+function resetPasswordEmailText(resetPasswordURL: string) {
+  return `
+Reset your Hangnex password
+
+We received a request to reset your password.
+
+Use the link below to set a new password:
+${resetPasswordURL}
+
+This link will expire shortly.
+
+If you didn’t request a password reset, you can safely ignore this email.
+
+— Hangnex Team
+`.trim();
+}

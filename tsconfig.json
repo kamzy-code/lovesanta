@@ -37,6 +37,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-, "__middleware.ts.bak"  ],
+, "__middleware.ts.bak", "src/app/_components/auth/authenticate.tsx"  ],
   "exclude": ["node_modules"]
 }

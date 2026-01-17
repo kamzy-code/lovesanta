@@ -3,7 +3,7 @@ import { AuthError } from "next-auth";
 import { DEFAULT_LOGIN_REDIRECT } from "routes";
 import { get } from "~/lib/common/getFromFormData";
 import { sendVerificationTokenMail } from "~/lib/common/sendMail";
-import { generateVerificationToken } from "~/lib/common/verificationToken";
+import { generateVerificationToken } from "~/lib/common/token";
 import { getUserByEmail } from "~/lib/db/users";
 import { loginSchema } from "~/schemas";
 import { signIn } from "~/server/auth/index";
