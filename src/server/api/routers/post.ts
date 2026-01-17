@@ -15,16 +15,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      return ctx.db.post.create({
-        data: {
-          name: input.name,
-          createdBy: { connect: { id: ctx.session.user.id } },
-        },
-      });
-    }),
 
   fetchGiverEnrollment: protectedProcedure
     .input(
@@ -88,11 +78,11 @@ export const postRouter = createTRPCRouter({
           user: {
             select: {
               id: true,
-              name: true,
-              username: true,
-              bio: true,
+              firstName: true,
+              lastName: true,
+              email: true,
               image: true,
-              region: true,
+              // region: true,
             },
           },
         },
@@ -106,12 +96,12 @@ export const postRouter = createTRPCRouter({
         include: {
           receiver: {
             select: {
-              id: true,
-              name: true,
-              username: true,
-              bio: true,
+             id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
               image: true,
-              region: true,
+              // region: true
             },
           },
         },
@@ -160,8 +150,8 @@ export const postRouter = createTRPCRouter({
             eventId: input.eventId,
             userId: input.userId,
             hasJoined: true,
-            region: user.region,
-            wishlist: user.bio,
+            // region: user.region,
+            wishlist: "Update your wishlist",
             budget: 100,
           },
         });
@@ -242,34 +232,20 @@ export const postRouter = createTRPCRouter({
           },
         });
       }
-      return await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
-        data: {
-          bio: input.bio,
-        },
-      });
+      return;
     }),
-
-  getLatest: protectedProcedure.query(async ({ ctx }) => {
-    const post = await ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: ctx.session.user.id } },
-    });
-
-    return post ?? null;
-  }),
 
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
 
-  updatePasscode: protectedProcedure
-    .input(z.object({ passcode: z.string().min(6) }))
-    .mutation(async ({ ctx, input }) => {
+  // updatePasscode: protectedProcedure
+  //   .input(z.object({ passcode: z.string().min(6) }))
+  //   .mutation(async ({ ctx, input }) => {
 
-      return await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
-        data: {passcode: input.passcode}
-      });
-    }),
+  //     return await ctx.db.user.update({
+  //       where: { id: ctx.session.user.id },
+  //       data: {passcode: input.passcode}
+  //     });
+  //   }),
 });

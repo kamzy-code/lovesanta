@@ -9,10 +9,6 @@ export default async function Home() {
   const session = await auth();
   console.log({ session, from: "[home]" });
 
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
-
   return (
     <HydrateClient>
       <Container pb={20}>

@@ -8,16 +8,16 @@ import { useForm } from "react-hook-form";
 
 export function ProfilePasscodeCard() {
   const utils = api.useUtils();
-  const updatePasscode = api.post.updatePasscode.useMutation({
-    onSuccess: async () => {
-      await utils.post.invalidate();
-    },
+  // const updatePasscode = api.post.updatePasscode.useMutation({
+  //   onSuccess: async () => {
+  //     await utils.post.invalidate();
+  //   },
 
-    onError: async (error) => {
-      alert(error.message);
-      await utils.post.invalidate();
-    },
-  });
+  //   onError: async (error) => {
+  //     alert(error.message);
+  //     await utils.post.invalidate();
+  //   },
+  // });
 
   const {
     register,
@@ -26,7 +26,7 @@ export function ProfilePasscodeCard() {
   } = useForm<{ passcode: string }>();
 
   const onSubmit = handleSubmit(async (data) => {
-    await updatePasscode.mutateAsync({ passcode: data.passcode });
+    // await updatePasscode.mutateAsync({ passcode: data.passcode });
     window.location.reload();
   });
   return (
@@ -58,7 +58,7 @@ export function ProfilePasscodeCard() {
           w={"full"}
           size="xs"
           variant="outline"
-          loading={isSubmitting || updatePasscode.isPending}
+          loading={isSubmitting}
         >
           Change passcode
         </Button>

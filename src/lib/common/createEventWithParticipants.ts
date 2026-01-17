@@ -6,7 +6,6 @@ interface EventPayload {
   eventId: string;
   userId: string;
   wishlist: string | null;
-  region: string;
   budget: number;
   hasJoined: boolean;
 }
@@ -18,7 +17,7 @@ export async function CreateEventAndEnrollParticipans(data: {
     description: string;
     status?: "ACTIVE" | "ENDED" | "UPCOMING";
   };
-  usersList: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[];
+  usersList: Partial<User>[];
 }) {
   const { name, description, year, status } = data.event;
 
@@ -43,12 +42,12 @@ export async function CreateEventAndEnrollParticipans(data: {
 }
 
 async function createUsers(
-  users: Pick<User, "name" | "username" | "passcode" | "region" | "bio">[],
+  users: Partial<User>[],
 ) {
   return await db.user.createManyAndReturn({
     data: users.map((user) => ({
       ...user,
-      username: user.username?.toLowerCase(),
+      email: user.email?.toLowerCase(),
     })),
     // Optional: skips records that conflict with unique constraints
     skipDuplicates: true,
@@ -76,9 +75,7 @@ async function createEventPayload(eventId: string, createdUsers: User[]) {
   return createdUsers.map((user) => ({
     eventId,
     userId: user.id,
-    wishlist: user.bio,
-    region: user.region,
-    category: user.category,
+    wishlist: "Update Wishlist",
     budget: 100,
     hasJoined: true,
   }));

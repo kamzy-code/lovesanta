@@ -39,14 +39,14 @@ export const ProfileSettingComponent = async () => {
             _dark: "linear-gradient(40deg, blue, purple, #81f242)",
           }}
           size="lg"
-          name={profile.name ?? "Santa Clause"}
+          name={profile.firstName ?? "Santa Clause"}
         />
       </Stack>
 
       <Stack gap="6">
         <Stack gap="0" mt={2}>
           <Text textTransform={"uppercase"} textStyle="md">
-            {profile.name}
+            {profile.firstName}
           </Text>
           <Text fontWeight={"medium"} color="fg.muted">
             Manage your settings
@@ -55,8 +55,8 @@ export const ProfileSettingComponent = async () => {
         <Stack gap="4">
           <AuthCard
             icon={<LuAtSign />}
-            title={profile.username ?? "username"}
-            description="Use username to login"
+            title={profile.email ?? "email"}
+            description="Use email to login"
             connected
           />
 
@@ -79,14 +79,14 @@ export const ProfileSettingComponent = async () => {
              <ProfilePasscodeCard/>
             </Stack>
           </ConfigPanel>
-
+{/* 
           <WishlistCard
             icon={<SiGoogle />}
             title="Wishlist"
             // @ts-expect-error type mismatch
             placeholder={profile.bio}
             description="What gifts would you like from Secret Santa "
-          />
+          /> */}
           {/* <AuthCard icon={<SiApple />} title="Apple" description="Connect your Apple account" /> */}
         </Stack>
       </Stack>

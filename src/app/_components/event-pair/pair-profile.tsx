@@ -12,7 +12,7 @@ import { type Participant, type User, type Event } from "@prisma/client";
 import { LuGlobe } from "react-icons/lu";
 
 type CombinedParticipantWithUserAndEvent = Participant & {
-  user?: Pick<User, "name" | "id" | "image" | "username" | "region" | "bio">;
+  user?: Pick<User, "firstName" | "id" | "image" | "email">;
   event?: Event;
 };
 
@@ -28,7 +28,7 @@ export const PairProfileHeader = ({
   participants,
   triesRemaining,
 }: PairProfileHeaderProps) => {
-  const pairName = participants.receiver.user?.name || "Elena Doe";
+  const pairName = participants.receiver.user?.firstName || "Elena Doe";
   const eventName = participants.giver.event?.name || "Christmas Party";
   const wishlist = participants.receiver.wishlist || "No wishlist yet";
 

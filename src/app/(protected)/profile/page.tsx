@@ -8,10 +8,6 @@ import { ProfileSettingComponent } from "~/app/_components/profile-settings";
 export default async function Home() {
   const session = await auth();
 
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
-
   const profileSettings = await ProfileSettingComponent();
 
   return (

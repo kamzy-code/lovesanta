@@ -45,7 +45,7 @@ const enrollOrGet = async ({ eventId, userId }: EnrollOrGetArgs) => {
         eventId,
         userId,
         hasJoined: true,
-        wishlist: user?.bio,
+        wishlist: "Update your wishlist",
         budget: 100,
       },
     });

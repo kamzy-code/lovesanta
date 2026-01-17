@@ -21,7 +21,7 @@ import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 
 type CombinedParticipantWithUserAndEvent = Participant & {
-  user?: Pick<User, "name" | "id" | "image" | "username" | "region" | "bio">;
+  user?: Pick<User, "firstName" | "id" | "image" | "email">;
   event?: Event;
 };
 
@@ -58,8 +58,8 @@ export default function PairPreferenceDrawer({
     },
   });
 
-  const giverName = participants.giver.user?.name || "Bukola Santa";
-  const receiverName = participants.receiver.user?.name || "Elena Doe";
+  const giverName = participants.giver.user?.firstName || "Bukola Santa";
+  const receiverName = participants.receiver.user?.firstName|| "Elena Doe";
 
   return (
     <DrawerRoot

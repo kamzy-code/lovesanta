@@ -12,7 +12,7 @@ import { LuConstruction } from "react-icons/lu";
 import { Avatar } from "~/components/ui/avatar";
 
 type ReceiverHistory = MatchHistory & {
-  receiver: Pick<User, "name" | "id" | "image" | "username" | "region" | "bio">;
+  receiver: Pick<User, "firstName" | "id" | "image" | "email">;
 };
 
 interface HistoryProps {
@@ -67,7 +67,7 @@ export const PreviousConnections = ({ history }: HistoryProps) => {
 
 const Member = (props: ReceiverHistory) => {
   const {
-    receiver: { name, username, region },
+    receiver: { firstName, email, },
     // matchedAt,
     // attemptNo,
   } = props;
@@ -90,21 +90,21 @@ const Member = (props: ReceiverHistory) => {
         />
         <Box>
           <Text textStyle="sm" fontWeight="medium">
-            {name}
+            {firstName}
           </Text>
           <HStack>
             <Text textStyle="sm" color="fg.muted">
               <span>@</span>
-              {username}
+              {email}
             </Text>
 
-            <Badge
+            {/* <Badge
               bg="linear-gradient(40deg, #730b0b, #0d0d02, #a7ff77)"
               color={"gray.50"}
               ml="1"
             >
               {region}
-            </Badge>
+            </Badge> */}
           </HStack>
         </Box>
       </Stack>
