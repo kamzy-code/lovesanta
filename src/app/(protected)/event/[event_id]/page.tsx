@@ -6,7 +6,7 @@ import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { HydrateClient } from "~/trpc/server";
 
-type EventPageProps = { params: { event_id: string } };
+type EventPageProps = { params: Promise<{ event_id: string }> };
 
 interface EnrollOrGetArgs {
   eventId: string;
