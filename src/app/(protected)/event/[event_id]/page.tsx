@@ -5,9 +5,8 @@ import { Suspense } from "react";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { HydrateClient } from "~/trpc/server";
-import { type PageProps } from ".next/types/app/page";
 
-type EventPageProps = PageProps & { params: { event_id: string } };
+type EventPageProps = { params: { event_id: string } };
 
 interface EnrollOrGetArgs {
   eventId: string;
