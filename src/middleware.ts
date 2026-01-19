@@ -5,6 +5,7 @@ import {
   apiAuthPrefix,
   authRoutes,
   publicRoutes,
+  onboardingRoutes,
 } from "routes";
 import { type NextAuthRequest } from "node_modules/next-auth/lib";
 
@@ -18,6 +19,7 @@ export default auth(async function middleware(request: NextAuthRequest) {
   const isAPIAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isOnboardingRoute = onboardingRoutes.includes(nextUrl.pathname);
 
   console.log({
     auth: request.auth,
@@ -33,6 +35,13 @@ export default auth(async function middleware(request: NextAuthRequest) {
   if (isAuthRoute) {
     if (isLoggedIn) {
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
+    return;
+  }
+
+  if (isOnboardingRoute) {
+    if (!isLoggedIn) {
+      return Response.redirect(new URL("/auth/login", nextUrl));
     }
     return;
   }

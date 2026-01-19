@@ -11,7 +11,11 @@ export default async function ProtectedLayout({
   console.log({ session, from: "[protected layout]" });
 
   if (!session) {
-    redirect("/");
+    redirect("/auth/login");
+  }
+
+  if (!session.user.username){
+    redirect("/onboarding/username");
   }
 
   return <>{children}</>;

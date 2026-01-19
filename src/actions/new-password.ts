@@ -59,49 +59,60 @@ export async function newPasswordAction(
     return response;
   }
 
-  const { token, password } = result.data!;
-  const resetToken = await getPasswordResetTokenByToken(token);
+  try {
+    const { token, password } = result.data!;
+    const resetToken = await getPasswordResetTokenByToken(token, true);
 
-  if (!resetToken) {
-    return {
-      success: false,
-      errors: { submitError: "Token does not exist!" },
-    } as NewPasswordFormState;
-  }
+    if (!resetToken) {
+      return {
+        success: false,
+        errors: { submitError: "Token does not exist!" },
+      } as NewPasswordFormState;
+    }
 
-  const hasExpired = new Date(resetToken.expires) < new Date();
+    const hasExpired = new Date(resetToken.expires) < new Date();
 
-  if (hasExpired) {
-    const newToken = await generatePasswordResetToken(resetToken.identifier);
-    await sendPasswordResetMail(newToken.identifier, newToken.token);
+    if (hasExpired) {
+      const newToken = await generatePasswordResetToken(resetToken.identifier);
+      await sendPasswordResetMail(newToken.identifier, newToken.token);
+      return {
+        success: false,
+        errors: {
+          submitError:
+            "Token has expired, a new reset link has been sent to your email.",
+        },
+      } as NewPasswordFormState;
+    }
+
+    const user = await getUserByEmail(resetToken.identifier, true);
+
+    if (!user) {
+      return {
+        success: false,
+        errors: { submitError: "User does not exist!" },
+      } as NewPasswordFormState;
+    }
+
+    const hashedPasswod = await bcrypt.hash(password, 10);
+
+    await db.user.update({
+      where: { id: user.id },
+      data: { password: hashedPasswod },
+    });
+
+    await db.passwordResetToken.delete({
+      where: { id: resetToken.id },
+    });
+
+    return { success: true } as NewPasswordFormState;
+  } catch (error) {
     return {
       success: false,
       errors: {
         submitError:
-          "Token has expired, a new reset link has been sent to your email.",
+          "Something went wrong. Please check your internet connection and try again.",
       },
+      values,
     } as NewPasswordFormState;
   }
-
-  const user = await getUserByEmail(resetToken.identifier);
-
-  if (!user) {
-    return {
-      success: false,
-      errors: { submitError: "User does not exist!" },
-    } as NewPasswordFormState;
-  }
-
-  const hashedPasswod = await bcrypt.hash(password, 10);
-
-  await db.user.update({
-    where: { id: user.id },
-    data: { password: hashedPasswod },
-  });
-
-  await db.passwordResetToken.delete({
-    where: { id: resetToken.id },
-  });
-
-  return { success: true } as NewPasswordFormState;
 }

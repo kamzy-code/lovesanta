@@ -72,6 +72,20 @@ export const SignupForm = () => {
               defaultValue={newFormState.values?.lastName || ""}
             />
           </Field>
+          
+          <Field
+            label="Username"
+            errorText={newFormState.errors?.username}
+            invalid={!!newFormState.errors?.username}
+          >
+            <Input
+              type="text"
+              autoComplete="Username"
+              name="username"
+              placeholder={"Enter your username"}
+              defaultValue={newFormState.values?.username || ""}
+            />
+          </Field>
 
           <Field
             label="Email"

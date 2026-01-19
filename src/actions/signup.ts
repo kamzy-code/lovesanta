@@ -10,6 +10,7 @@ import { sendVerificationTokenMail } from "~/lib/common/sendMail";
 export interface SignupFormValue {
   firstName: string;
   lastName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -31,15 +32,16 @@ export async function SignupAction(
 ) {
   const errors: SignupFormError = {};
 
-  const values = {
+  const values: SignupFormValue = {
     firstName: get("firstName", formData),
     lastName: get("lastName", formData),
+    username: get("username", formData),
     email: get("email", formData),
     password: get("password", formData),
     confirmPassword: get("confirmPassword", formData),
   };
 
-  const result = signupSchema.safeParse(values as unknown);
+  const result = await signupSchema.safeParseAsync(values as unknown);
 
   if (!result.success) {
     result.error.errors.forEach((issue) => {
@@ -75,6 +77,7 @@ export async function SignupAction(
       data: {
         firstName: values.firstName.toLowerCase().trim(),
         lastName: values.lastName.toLowerCase().trim(),
+        username: values.username.toLowerCase().trim(),
         email: values.email.toLowerCase().trim(),
         password: hashedPasswod,
       },

@@ -129,13 +129,12 @@ model User {
   id            String        @id @default(cuid())
   firstName     String?
   lastName      String?
+  username      String?       @unique
   password      String?
   // gender        String?
   email         String?       @unique
   emailVerified DateTime?
   /// @param loginCount - This is a hack we increment upon login
-  /// For now we created this to help with the pin reset process, bcos
-  /// We manually register our users with the same pin directly from the database
   loginCount    Int           @default(0)
   image         String?
   role          UserRole      @default(USER)

@@ -40,23 +40,34 @@ export const resetPasswordAction = async (
 
   const { email: validatedEmail } = result.data;
 
-  const user = await getUserByEmail(validatedEmail);
+  try {
+    const user = await getUserByEmail(validatedEmail, true);
 
-  if (!user) {
+    if (!user) {
+      return {
+        success: false,
+        errors: {
+          submitError: "Account with this email doesn't exist",
+        },
+        values: { email },
+      } as ResetPasswordFormState;
+    }
+
+    const passowrdResetToken = await generatePasswordResetToken(user.email!);
+    await sendPasswordResetMail(
+      passowrdResetToken.identifier,
+      passowrdResetToken.token,
+    );
+
+    return { success: true } as ResetPasswordFormState;
+  } catch (error) {
     return {
       success: false,
       errors: {
-        submitError: "Account with this email doesn't exist",
+        submitError:
+           "Something went wrong. Please check your internet connection and try again.",
       },
       values: { email },
     } as ResetPasswordFormState;
   }
-
-  const passowrdResetToken = await generatePasswordResetToken(user.email!);
-  await sendPasswordResetMail(
-    passowrdResetToken.identifier,
-    passowrdResetToken.token,
-  );
-
-  return { success: true } as ResetPasswordFormState;
 };

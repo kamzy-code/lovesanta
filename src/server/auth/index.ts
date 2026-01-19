@@ -145,6 +145,7 @@ const {
       if (!existingUser) return token;
 
       token.role = existingUser.role;
+      token.username = existingUser.username;
       return token;
     },
 
@@ -163,6 +164,10 @@ const {
 
       if (token.role && session.user) {
         session.user.role = token.role;
+      }
+
+       if (token.username && session.user) {
+        session.user.username = token.username!;
       }
       return session;
     },

@@ -6,6 +6,13 @@
 export const publicRoutes = ["/", "/demo", "/auth/verify-email"];
 
 /**
+ * An array of routes that require authentication but don't redirect logged-in users.
+ * These are typically onboarding or setup routes.
+ * @type {string[]}
+ */
+export const onboardingRoutes = ["/onboarding/username"];
+
+/**
  * An array of routes that are used for authentication.
  * These routes will redirect logged in users to /home
  * @type {string[]}

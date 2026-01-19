@@ -23,3 +23,15 @@ export const getUserById = async (id: string, throwError?: boolean) => {
     return null;
   }
 };
+
+export const getUserByUsername = async (username: string, throwError?: boolean) => {
+  try {
+    const user = await db.user.findUnique({
+      where: { username: username.trim() },
+    });
+    return user;
+  } catch (error) {
+    if (throwError && error instanceof Error) throw new Error(error.message)
+    return null;
+  }
+};
