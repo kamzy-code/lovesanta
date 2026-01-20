@@ -6,7 +6,6 @@ export default function SignupPage() {
   return (
     <Container>
       <SignupStack />
-      <NavbarComponent/>
     </Container>
   );
 }

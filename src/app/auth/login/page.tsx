@@ -6,7 +6,6 @@ export default function LoginPage() {
   return (
     <Container>
       <AuthenticateStack />
-      <NavbarComponent />
     </Container>
   );
 }

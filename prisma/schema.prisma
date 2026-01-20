@@ -11,8 +11,9 @@ datasource db {
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
   // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-  // url      = env("DATABASE_URL")
 }
+
+// ENUMS
 
 enum EventStatus {
   ACTIVE
@@ -25,77 +26,124 @@ enum UserRole {
   USER
 }
 
-model Event {
-  id          String      @id @default(cuid())
-  name        String
-  year        Int
-  date        DateTime    @default(now())
-  description String
-  status      EventStatus @default(ENDED)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  participants Participant[]
-  matches      Match[]
-  MatchHistory MatchHistory[]
+enum ActivityType {
+  GIFTING // The "Love Feast"
+  TRIVIA
+  SCAVENGER
+  POLLS
+  ICEBREAKER
 }
 
-model Participant {
-  id        String   @id @default(cuid())
-  userId    String
-  eventId   String
-  region    String   @default("africa") // inherit from @User africa, world, europe, asia
-  category  String   @default("adult") // inherit from @User adult, kids
-  hasJoined Boolean  @default(false)
-  wishlist  String?  @db.Text
-  budget    Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user          User    @relation(fields: [userId], references: [id])
-  event         Event   @relation(fields: [eventId], references: [id])
-  givingTo      Match[] @relation("Giver")
-  receivingFrom Match[] @relation("Receiver")
-
-  @@unique([userId, eventId])
-}
-
-model Match {
-  id         String      @id @default(cuid())
-  eventId    String
-  giverId    String
-  receiverId String
-  status     MatchStatus @default(ACCEPTED)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  event    Event       @relation(fields: [eventId], references: [id])
-  giver    Participant @relation("Giver", fields: [giverId], references: [id])
-  receiver Participant @relation("Receiver", fields: [receiverId], references: [id])
-
-  @@unique([eventId, giverId])
-  @@unique([eventId, receiverId])
-}
-
-enum MatchStatus {
+enum ActivityStatus {
   PENDING
-  ACCEPTED
+  ACTIVE
   COMPLETED
 }
 
-model MatchHistory {
-  id             String   @id @default(cuid())
-  eventId        String
-  giverUserId    String
-  receiverUserId String
-  matchedAt      DateTime @default(now())
-  attemptNo      Int // Track which attempt this was, for sorting
-  event          Event    @relation(fields: [eventId], references: [id])
+//MODELS
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String?     @db.Text
+  location    String?
+  date        DateTime
+  slug        String      @unique // The unique part of the URL (e.g., 'friday-games-xyz')
+  status      EventStatus @default(UPCOMING)
 
-  receiver User @relation(fields: [receiverUserId], references: [id])
+  // Ownership
+  creatorId String
+  creator   User   @relation("EventCreator", fields: [creatorId], references: [id])
 
-  @@index([eventId, giverUserId])
+  // Relations
+
+  activities   Activity[] // An event can have many activities
+  participants Participant[]
+  // teams        Team[]
+  // matches      Match[]
+  // matchHistory MatchHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creatorId])
 }
+
+model Participant {
+  id      String @id @default(cuid())
+  userId  String
+  eventId String
+
+  // This is where the event-specific wishlist lives!
+  wishlist String? @db.Text
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  givingTo      Match[] @relation("Giver")
+  receivingFrom Match[] @relation("Receiver")
+
+  joinedAt DateTime @default(now())
+
+  // Critical: A user can only be a participant in an event once
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Activity {
+  id     String         @id @default(cuid())
+  type   ActivityType
+  status ActivityStatus @default(PENDING)
+
+  // Settings is a JSON field. Why? 
+  // Because Gifting needs "budget", Trivia needs "questions", etc.
+  settings Json?
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // For Gifting/Love Feast specifically
+  matches Match[]
+
+  createdAt DateTime @default(now())
+}
+
+model Match {
+  id         String   @id @default(cuid())
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id])
+
+  giverId    String
+  receiverId String
+
+  giver    Participant @relation("Giver", fields: [giverId], references: [id])
+  receiver Participant @relation("Receiver", fields: [receiverId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([activityId, giverId])
+  @@unique([activityId, receiverId])
+}
+
+// enum MatchStatus {
+//   PENDING
+//   ACCEPTED
+//   COMPLETED
+// }
+
+// model MatchHistory {
+//   id             String   @id @default(cuid())
+//   eventId        String
+//   giverUserId    String
+//   receiverUserId String
+//   matchedAt      DateTime @default(now())
+//   attemptNo      Int // Track which attempt this was, for sorting
+//   event          Event    @relation(fields: [eventId], references: [id])
+
+//   receiver User @relation(fields: [receiverUserId], references: [id])
+
+//   @@index([eventId, giverUserId])
+// }
 
 // Necessary for Next auth
 model Account {
@@ -104,12 +152,12 @@ model Account {
   type                     String
   provider                 String
   providerAccountId        String
-  refresh_token            String? // @db.Text
-  access_token             String? // @db.Text
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
   expires_at               Int?
   token_type               String?
   scope                    String?
-  id_token                 String? // @db.Text
+  id_token                 String? @db.Text
   session_state            String?
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   refresh_token_expires_in Int?
@@ -143,11 +191,12 @@ model User {
   // bio           String?
   accounts      Account[]
   sessions      Session[]
-  participants  Participant[]
+  createdEvents Event[]       @relation("EventCreator")
+  participating Participant[]
 
   /// @param matchHistory - Where a user has been matched as a receiver
   /// reference is @receiverUserId in MatchHistory model.
-  matchHistory MatchHistory[]
+  // matchHistory MatchHistory[]
 }
 
 model VerificationToken {

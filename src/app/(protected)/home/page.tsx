@@ -1,10 +1,10 @@
 import { HydrateClient } from "~/trpc/server";
 
-import { EventFeedComponent } from "~/components/event-feed";
+import { EventFeedComponent } from "~/app/_components/event/event-feed";
 import { NavbarComponent } from "~/components/navbar/block";
 import { Container } from "@chakra-ui/react";
-import { db } from "~/server/db";
-import { events, type Event } from "~/components/event-feed/_data";
+import { Suspense } from "react";
+import { EventFeedSkeleton } from "~/app/_components/event/event-feed/skeleton";
 
 export default async function Home() {
   /**
@@ -19,23 +19,13 @@ export default async function Home() {
    * And in the future only show events the user already joined instead of pulling
    * all events from the db
    */
-  const dbEvents = await db.event.findMany({
-    include: {
-      participants: true,
-    },
-  });
-
-  const feed = [
-    ...events,
-    ...dbEvents.map((p) => ({ ...p, participants: p.participants.length })),
-  ].sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  }) as Event[];
 
   return (
     <HydrateClient>
-      <Container pb={24}>
-        <EventFeedComponent events={feed} />
+      <Container maxW="6xl" pb={24}>
+        <Suspense fallback={<EventFeedSkeleton />}>
+          <EventFeedComponent />
+        </Suspense>
         <NavbarComponent activeMenuKey={0} />
       </Container>
     </HydrateClient>

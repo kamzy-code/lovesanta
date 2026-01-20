@@ -5,6 +5,8 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { Provider } from "~/components/ui/provider";
 import { Bricolage_Grotesque } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { Container } from "@chakra-ui/react";
+import { NavbarComponent } from "~/components/navbar/block";
 
 export const metadata: Metadata = {
   title: "Secret Santa App",
@@ -38,7 +40,12 @@ export default async function RootLayout({
       <body>
         <TRPCReactProvider>
           <SessionProvider session={session}>
-            <Provider>{children}</Provider>
+            <Provider>
+              <Container maxW="6xl" pb={24}>
+                {children}
+                <NavbarComponent activeMenuKey={0} />
+              </Container>
+            </Provider>
           </SessionProvider>
         </TRPCReactProvider>
       </body>
