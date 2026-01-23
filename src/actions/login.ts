@@ -35,6 +35,7 @@ export async function LoginAction(
     password: get("password", formData),
     rememberMe: get("rememberMe", formData) || "off",
   };
+  const eventSlug = get("eventSlug", formData);
 
   const result = loginSchema.safeParse(values as unknown);
 
@@ -97,7 +98,7 @@ export async function LoginAction(
       email,
       password,
       rememberMe,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: eventSlug ? `/event/${eventSlug}` : DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {

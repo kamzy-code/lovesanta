@@ -28,7 +28,7 @@ export const EventFeedComponent = async () => {
     ...dbEvents.map((p) => ({ ...p, participantCount: p.participants.length })),
   ].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
-  }) as EventWithCount[];
+  });
 
   const session = await auth();
   return (
@@ -65,7 +65,7 @@ export const EventFeedComponent = async () => {
 
         {events.map((event) => (
           <Link
-            href={event.status != "ENDED" ? `/event/${event.id}` : "#"}
+            href={event.status != "ENDED" ? `/event/${event.slug}` : "#"}
             key={event.id}
           >
             <Flex

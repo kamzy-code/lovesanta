@@ -17,16 +17,11 @@ export default auth(async function middleware(request: NextAuthRequest) {
   const isLoggedIn = !!request.auth;
 
   const isAPIAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isEventDetailRoute = /^\/event\/[^/]+$/.test(nextUrl.pathname);
+  const isPublicRoute =
+    publicRoutes.includes(nextUrl.pathname) || isEventDetailRoute;
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isOnboardingRoute = onboardingRoutes.includes(nextUrl.pathname);
-
-  console.log({
-    auth: request.auth,
-    from: "Middleware",
-    path: request.nextUrl.pathname,
-    isLoggedIn
-  });
 
   if (isAPIAuthRoute) {
     return;

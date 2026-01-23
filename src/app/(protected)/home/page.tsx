@@ -26,7 +26,6 @@ export default async function Home() {
         <Suspense fallback={<EventFeedSkeleton />}>
           <EventFeedComponent />
         </Suspense>
-        <NavbarComponent activeMenuKey={0} />
       </Container>
     </HydrateClient>
   );
