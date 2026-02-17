@@ -1,7 +1,9 @@
 import {
+  AbsoluteCenter,
   Badge,
   Box,
   Container,
+  Flex,
   Heading,
   HStack,
   Stack,
@@ -23,58 +25,88 @@ export async function EventDetailsComponent({ slug }: { slug: string }) {
     (p) => p.userId === session?.user.id,
   );
 
+  if (!event) {
+    return (
+      <Container minH={"vh"} py={{ base: "12", md: "24" }}>
+        <AbsoluteCenter flexDir={"column"} gap={4}>
+          <Heading>Event Not Found</Heading>
+
+          <Link href={"/home"}>
+            <Button variant={"outline"} size={"lg"} border={"1px solid"}>
+              Back
+            </Button>
+          </Link>
+        </AbsoluteCenter>
+      </Container>
+    );
+  }
   return (
-    <Container py={{ base: "12", md: "24" }} spaceY={"6"}>
-      {session && (
-        <Link href={"/home"}>
-          <Button variant={"outline"} size={"lg"} border={"1px solid"}>
-            Back
-          </Button>
-        </Link>
-      )}
+    <Flex
+      py={{ base: "12", md: "24" }}
+      spaceY={"6"}
+      direction="column"
+      h="vh"
+      overflow="hidden"
+    >
+      <Box spaceY={"6"} flexShrink={0}>
+        {session && (
+          <Link href={"/home"}>
+            <Button variant={"outline"} size={"lg"} border={"1px solid"}>
+              Back
+            </Button>
+          </Link>
+        )}
 
-      <Stack gap="6">
-        <Box spaceY={"6"}>
-          <Box spaceY={"2"}>
-            <Heading fontFamily={"Alliance"} size={{ base: "3xl", md: "4xl" }}>
-              {event?.title}
-            </Heading>
-            <Box>
-              <Text color={"fg.muted"}>{event?.description}</Text>
-              <Text
-                color={"fg.muted"}
-              >{`Creatd By: ${event?.creator.username}`}</Text>
+        <Stack gap="6">
+          <Box spaceY={"6"}>
+            <Box spaceY={"2"}>
+              <Heading
+                fontFamily={"Alliance"}
+                size={{ base: "3xl", md: "4xl" }}
+              >
+                {event?.title}
+              </Heading>
+              <Box>
+                <Text color={"fg.muted"}>{event?.description}</Text>
+                <Text
+                  color={"fg.muted"}
+                >{`Creatd By: ${event?.creator.username}`}</Text>
+              </Box>
             </Box>
-          </Box>
 
-          <HStack justify="space-between" mt={4}>
-            <Text fontWeight="bold">
-              {event?.date ? formatDateToString(event?.date) : "NO DATE"}
-            </Text>
-            <Badge variant="surface" colorScheme={"green"}>
-              {event?.status}
-            </Badge>
-          </HStack>
-
-          <HStack
-            alignItems={"start"}
-            justify="space-between"
-            mt={4}
-            flexDirection={{ base: "column", sm: "row" }}
-            gap={"2"}
-          >
-            <HStack>
-              <FaMapPin />
-              <Text> {event?.location}</Text>
+            <HStack justify="space-between" mt={4}>
+              <Text fontWeight="bold">
+                {event?.date ? formatDateToString(event?.date) : "NO DATE"}
+              </Text>
+              <Badge variant="surface" colorScheme={"green"}>
+                {event?.status}
+              </Badge>
             </HStack>
-            {session && hasJoined && <ShareEvent slug={slug} />}
-            {session && !hasJoined && <JoinEvent eventId={event?.id!} />}
-            {!session && <LoginToJoin slug={slug} />}
-          </HStack>
-        </Box>
-      </Stack>
 
-      <EventTabs participants={event?.participants ? event.participants : []} />
-    </Container>
+            <HStack
+              alignItems={"start"}
+              justify="space-between"
+              mt={4}
+              flexDirection={{ base: "column", sm: "row" }}
+              gap={"2"}
+            >
+              <HStack>
+                <FaMapPin />
+                <Text> {event?.location}</Text>
+              </HStack>
+              {session && hasJoined && <ShareEvent slug={slug} />}
+              {session && !hasJoined && <JoinEvent eventId={event?.id} />}
+              {!session && <LoginToJoin slug={slug} />}
+            </HStack>
+          </Box>
+        </Stack>
+      </Box>
+
+      <EventTabs
+        eventId={event?.id}
+        isCreator={event.creatorId === session?.user.id}
+        participants={event?.participants ? event.participants : []}
+      />
+    </Flex>
   );
 }

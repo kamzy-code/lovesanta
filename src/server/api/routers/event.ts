@@ -24,6 +24,7 @@ export const eventRouter = createTRPCRouter({
               },
             },
           },
+          activities: true,
         },
       });
       return event;

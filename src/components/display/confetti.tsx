@@ -11,14 +11,24 @@ export function ConfettiComponent({ show }: ConfProps) {
   const { width, height } = useWindowSize();
 
   return (
-    <Confetti
-      width={width}
-      height={height}
-      recycle={false}
-      numberOfPieces={show ? 750 : 0}
-      onConfettiComplete={(confettiInstance: any) => {
-        confettiInstance.reset();
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        pointerEvents: "none",
+        overflow: "hidden",
+        zIndex: 9999,
       }}
-    />
+    >
+      <Confetti
+        width={width}
+        height={height}
+        recycle={false}
+        numberOfPieces={show ? 750 : 0}
+      />
+    </div>
   );
 }

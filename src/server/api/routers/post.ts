@@ -184,7 +184,7 @@ export const postRouter = createTRPCRouter({
 
         return await matchParticipant({
           participant,
-          prisma: ctx.db,
+          db: ctx.db,
           eventId: input.eventId,
         });
       }
@@ -207,7 +207,7 @@ export const postRouter = createTRPCRouter({
       });
 
       return rematchParticipant({
-        prisma: ctx.db,
+        db: ctx.db,
         eventId: input.eventId,
         participant: participant,
       });

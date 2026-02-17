@@ -1,0 +1,141 @@
+"use client";
+import {
+  Box,
+  Text,
+  Badge,
+  Button,
+  HStack,
+  Icon,
+  Menu,
+  Portal,
+} from "@chakra-ui/react";
+import { Activity } from "@prisma/client";
+import { FiPlay, FiGift } from "react-icons/fi";
+import { api } from "~/trpc/react";
+
+interface ActivityProps {
+  activity: Activity;
+  isCreator: boolean;
+}
+export const ActivityCard = ({ activity, isCreator }: ActivityProps) => {
+  const isGifting = activity.type === "GIFTING";
+  const utils = api.useUtils();
+
+  const { mutate: deleteActivty, isPending } =
+    api.activity.deleteActivity.useMutation({
+      onMutate: async ({ activityId }) => {
+        // Cancel ongoing queries to prevent overwriting optimistic update
+        await utils.activity.getEventActivities.cancel({
+          eventId: activity.eventId,
+        });
+
+        // Get previous data for potential rollback
+        const previousData = utils.activity.getEventActivities.getData({
+          eventId: activity.eventId,
+        });
+
+        // Optimistically remove the activity from cache
+        utils.activity.getEventActivities.setData(
+          { eventId: activity.eventId },
+          (data) => data?.filter((a) => a.id !== activityId) || [],
+        );
+
+        return { previousData };
+      },
+      onSuccess: async () => {
+        // Handle success - maybe show a toast or refresh data
+      },
+      onError: (error, variables, context) => {
+        // Rollback on error
+        if (context?.previousData) {
+          utils.activity.getEventActivities.setData(
+            { eventId: activity.eventId },
+            context.previousData,
+          );
+        }
+        // Handle error - show error message
+        console.error("Failed to delet activity:", error.message);
+      },
+    });
+
+  const handleDelete = () => {
+    deleteActivty({ activityId: activity.id });
+  };
+
+  return (
+    <Box
+      border="1px solid black"
+      p={4}
+      mb={3}
+      _hover={{ borderColor: "green.400" }}
+      transition="0.2s"
+    >
+      {/* {isPending && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="blackAlpha.500"
+          zIndex={1}
+        >
+          <Text textAlign="center" mt="20%">
+            Deleting...
+          </Text>
+        </Box>
+      )} */}
+
+      <HStack justify="space-between">
+        <HStack gap={4}>
+          <Icon as={isGifting ? FiGift : FiPlay} boxSize={5} />
+          <Box>
+            <Text fontWeight="bold" textTransform="uppercase">
+              {activity.type.replace("_", " ")}
+            </Text>
+            <Badge
+              variant="outline"
+              colorScheme={activity.status === "ACTIVE" ? "green" : "gray"}
+            >
+              {activity.status}
+            </Badge>
+          </Box>
+        </HStack>
+
+        <HStack>
+          {/* Admin Controls */}
+          {/* {isCreator && activity.status === "PENDING" && (
+            <Button
+              size="sm"
+              variant="outline"
+              _hover={{ bg: "green.600/80", color: "black" }}
+              onClick={() => onStart(activity.id)}
+            >
+              <FiPlay />
+              START
+            </Button>
+          )} */}
+
+          {isCreator && (
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button variant="outline" size="sm">
+                  Open
+                </Button>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item value="remove-activity" onClick={handleDelete}>
+                      Remove Activity
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+          )}
+        </HStack>
+      </HStack>
+    </Box>
+  );
+};

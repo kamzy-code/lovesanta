@@ -41,7 +41,7 @@ export default async function RootLayout({
         <TRPCReactProvider>
           <SessionProvider session={session}>
             <Provider>
-              <Container maxW="6xl" pb={24}>
+              <Container maxW="6xl">
                 {children}
                 <NavbarComponent activeMenuKey={0} />
               </Container>

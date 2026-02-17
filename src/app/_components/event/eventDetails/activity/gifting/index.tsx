@@ -1,0 +1,79 @@
+"use client";
+
+import { Box, Container, Stack, Tabs, VStack } from "@chakra-ui/react";
+import { type Activity, type Participant } from "@prisma/client";
+import { WishlistSection } from "./wishlist-section";
+import { PairSection } from "./pair-section";
+import { MatchHistorySection } from "./match-history-section";
+import { LuGift, LuHistory, LuList } from "react-icons/lu";
+
+interface GiftingActivityProps {
+  activity: Activity;
+  eventId: string;
+  participantId: string;
+}
+
+export function GiftingActivity({
+  activity,
+  eventId,
+  participantId,
+}: GiftingActivityProps) {
+  return (
+    <Container maxW="5xl" py={12}>
+      <Tabs.Root
+        defaultValue="wishlist"
+        display="flex"
+        flexDirection="column"
+        gap={6}
+      >
+        <Tabs.List>
+          <Tabs.Trigger value="wishlist">
+            <LuList />
+            My Wishlist
+          </Tabs.Trigger>
+          <Tabs.Trigger value="pair">
+            <LuGift />
+            My Pair
+          </Tabs.Trigger>
+          <Tabs.Trigger value="history">
+            <LuHistory />
+            History
+          </Tabs.Trigger>
+        </Tabs.List>
+
+        <Tabs.ContentGroup
+          flexDirection="column"
+          gap={6}
+          css={{
+            "&::-webkit-scrollbar": { width: "4px" },
+            "&::-webkit-scrollbar-track": { background: "transparent" },
+            "&::-webkit-scrollbar-thumb": { background: "white" },
+          }}
+        >
+          <Tabs.Content value="wishlist">
+            <WishlistSection
+              eventId={eventId}
+              participantId={participantId}
+            />
+          </Tabs.Content>
+
+          <Tabs.Content value="pair">
+            <PairSection
+              eventId={eventId}
+              participantId={participantId}
+              activityId={activity.id}
+              activityStatus={activity.status}
+            />
+          </Tabs.Content>
+
+          <Tabs.Content value="history">
+            <MatchHistorySection
+              eventId={eventId}
+              participantId={participantId}
+            />
+          </Tabs.Content>
+        </Tabs.ContentGroup>
+      </Tabs.Root>
+    </Container>
+  );
+}

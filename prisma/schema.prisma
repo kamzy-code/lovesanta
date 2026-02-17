@@ -58,9 +58,7 @@ model Event {
 
   activities   Activity[] // An event can have many activities
   participants Participant[]
-  // teams        Team[]
-  // matches      Match[]
-  // matchHistory MatchHistory[]
+  matchHistory MatchHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,6 +103,8 @@ model Activity {
   matches Match[]
 
   createdAt DateTime @default(now())
+
+  @@unique([eventId, type]) // An event can only have one activity of each type
 }
 
 model Match {
@@ -125,25 +125,20 @@ model Match {
   @@unique([activityId, receiverId])
 }
 
-// enum MatchStatus {
-//   PENDING
-//   ACCEPTED
-//   COMPLETED
-// }
+model MatchHistory {
+  id             String   @id @default(cuid())
+  eventId        String
+  giverUserId    String
+  receiverUserId String
+  matchedAt      DateTime @default(now())
+  attemptNo      Int      @default(1)
 
-// model MatchHistory {
-//   id             String   @id @default(cuid())
-//   eventId        String
-//   giverUserId    String
-//   receiverUserId String
-//   matchedAt      DateTime @default(now())
-//   attemptNo      Int // Track which attempt this was, for sorting
-//   event          Event    @relation(fields: [eventId], references: [id])
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  receiver User  @relation("ReceiverHistory", fields: [receiverUserId], references: [id], onDelete: Cascade)
 
-//   receiver User @relation(fields: [receiverUserId], references: [id])
-
-//   @@index([eventId, giverUserId])
-// }
+  @@index([eventId, giverUserId])
+  @@index([receiverUserId])
+}
 
 // Necessary for Next auth
 model Account {
@@ -193,10 +188,7 @@ model User {
   sessions      Session[]
   createdEvents Event[]       @relation("EventCreator")
   participating Participant[]
-
-  /// @param matchHistory - Where a user has been matched as a receiver
-  /// reference is @receiverUserId in MatchHistory model.
-  // matchHistory MatchHistory[]
+  matchHistoryAsReceiver MatchHistory[] @relation("ReceiverHistory")
 }
 
 model VerificationToken {

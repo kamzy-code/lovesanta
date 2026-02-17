@@ -2,6 +2,8 @@ import { Container } from "@chakra-ui/react";
 import { Suspense } from "react";
 import { EventFeedSkeleton } from "~/app/_components/event/event-feed/skeleton";
 import { EventDetailsComponent } from "~/app/_components/event/eventDetails";
+import { AddActivityModal } from "~/app/_components/event/eventDetails/activity/addActivityModal";
+import { PageLoader } from "~/components/ui/pageLoader";
 
 export default async function EventDetails({
   params,
@@ -11,10 +13,10 @@ export default async function EventDetails({
   const { slug } = await params;
   console.log({ slug });
   return (
-    <Container maxW="6xl" pb={24}>
-      <Suspense fallback={<EventFeedSkeleton />}>
+    <Suspense fallback={<PageLoader/>}>
+      <Container maxW="6xl">
         <EventDetailsComponent slug={slug} />
-      </Suspense>
-    </Container>
+      </Container>
+    </Suspense>
   );
 }

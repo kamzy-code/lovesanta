@@ -3,46 +3,9 @@ import { TRPCError } from "@trpc/server";
 import { getRandomNode } from "~/lib/common/helpers";
 
 interface MatchParticipantOptions {
-  prisma: PrismaClient;
+  db: PrismaClient;
   eventId: string;
   participant: Participant;
-}
-
-export async function createYearlyEvent(
-  prisma: PrismaClient,
-  data: {
-    name: string;
-    year: number;
-    date: Date;
-    description: string;
-  },
-) {
-  return prisma.event.create({
-    data: {
-      ...data,
-      status: "ACTIVE",
-    },
-  });
-}
-
-export async function addParticipant(
-  prisma: PrismaClient,
-  data: {
-    userId: string;
-    eventId: string;
-    wishlist?: string;
-    budget?: number;
-  },
-) {
-  return prisma.participant.create({
-    data: {
-      userId: data.userId,
-      eventId: data.eventId,
-      wishlist: data.wishlist,
-      budget: data.budget,
-      hasJoined: true,
-    },
-  });
 }
 
 /**
@@ -56,25 +19,39 @@ export async function addParticipant(
  *
  */
 export async function matchParticipant({
-  prisma,
+  db,
   eventId,
   participant,
 }: MatchParticipantOptions) {
   try {
-    // Get all participants except the giver
-    const participants = await prisma.participant.findMany({
+    // Get the gifting activity for this event
+    const giftingActivity = await db.activity.findFirst({
       where: {
         eventId,
-        // region: participant.region,
-        category: participant.category,
-        NOT: { id: participant.id },
-      },
-      include: {
-        receivingFrom: true, // Get existing matches where they're receiving
+        type: "GIFTING",
       },
     });
 
-    // Filter out participants who already have a gift giver
+    if (!giftingActivity) {
+      throw new Error("Gifting activity not found for this event");
+    }
+
+    // Get all participants except the giver
+    const participants = await db.participant.findMany({
+      where: {
+        eventId,
+        NOT: { id: participant.id },
+      },
+      include: {
+        receivingFrom: {
+          where: {
+            activityId: giftingActivity.id,
+          },
+        },
+      },
+    });
+
+    // Filter out participants who already have a gift giver for this activity
     const availableReceivers = participants.filter(
       (p) => p.receivingFrom.length === 0,
     );
@@ -86,19 +63,21 @@ export async function matchParticipant({
     // Randomly select a receiver
     const receiver = getRandomNode(availableReceivers) as { id: string };
 
-    return prisma.match.create({
+    return db.match.create({
       data: {
-        eventId,
+        activityId: giftingActivity.id,
         giverId: participant.id,
         receiverId: receiver.id,
-        status: "ACCEPTED",
       },
     });
   } catch (error) {
     console.error(error);
     throw new TRPCError({
       code: "CONFLICT",
-      message: "Failed to match participant",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to match participant",
     });
   }
 }
@@ -127,12 +106,24 @@ export async function matchParticipant({
  *
  */
 export async function rematchParticipant({
-  prisma,
+  db,
   eventId,
   participant,
 }: MatchParticipantOptions) {
+   // Get the gifting activity for this event
+    const giftingActivity = await db.activity.findFirst({
+      where: {
+        eventId,
+        type: "GIFTING",
+      },
+    });
+
+    if (!giftingActivity) {
+      throw new Error("Gifting activity not found for this event");
+    }
+
   // Get match history count
-  const matchAttempts = await prisma.matchHistory.count({
+  const matchAttempts = await db.matchHistory.count({
     where: {
       eventId,
       giverUserId: participant.userId,
@@ -144,7 +135,7 @@ export async function rematchParticipant({
   }
 
   // Get previous receivers from history
-  const previousMatches = await prisma.matchHistory.findMany({
+  const previousMatches = await db.matchHistory.findMany({
     where: {
       eventId,
       giverUserId: participant.userId,
@@ -162,11 +153,10 @@ export async function rematchParticipant({
    * Get the current pair that our particpant
    * has been matched with
    */
-  const currentMatch = await prisma.match.findFirst({
+  const currentMatch = await db.match.findFirst({
     where: {
-      eventId,
+      activityId: giftingActivity.id,
       giverId: participant.id,
-      NOT: { status: "COMPLETED" },
     },
     include: {
       receiver: true,
@@ -181,19 +171,25 @@ export async function rematchParticipant({
    * @operation
    *
    * Search for new pairs
-   * We rely on the database to filter out participants who
-   * have not been paired or have been paired with the current giver
+   * We filter out participants who:
+   * 1. Are the same as the giver
+   * 2. Have been matched before with this giver
+   * 3. Already have a gift giver for this gifting activity
    */
-  const availableReceivers = await prisma.participant.findMany({
+  const availableReceivers = await db.participant.findMany({
     where: {
       eventId,
-      category: participant.category,
       NOT: {
         OR: [{ id: participant.id }, { userId: { in: previousReceivers } }],
       },
       receivingFrom: {
-        none: {},
+        none: {
+          activityId: giftingActivity.id,
+        },
       },
+    },
+    include: {
+      user: true,
     },
   });
 
@@ -212,7 +208,7 @@ export async function rematchParticipant({
    * !!!We also delete the current match record
    */
   if (currentMatch) {
-    await prisma.matchHistory.create({
+    await db.matchHistory.create({
       data: {
         eventId,
         giverUserId: participant.userId,
@@ -223,7 +219,7 @@ export async function rematchParticipant({
     });
 
     // Delete current match
-    await prisma.match.delete({
+    await db.match.delete({
       where: {
         id: currentMatch.id,
       },
@@ -242,12 +238,11 @@ export async function rematchParticipant({
    * records, however in the future, it might be better to simply update
    * the "receiverId" field in the current match record
    */
-  return prisma.match.create({
+  return db.match.create({
     data: {
-      eventId,
+      activityId: giftingActivity.id,
       giverId: participant.id,
       receiverId: receiver.id,
-      status: "ACCEPTED",
     },
   });
 }
