@@ -36,7 +36,20 @@ export async function matchParticipant({
       throw new Error("Gifting activity not found for this event");
     }
 
-    // Get all participants except the giver
+    // Get participants who are giving to this participant (their givers)
+    const myGivers = await db.match.findMany({
+      where: {
+        activityId: giftingActivity.id,
+        receiverId: participant.id,
+      },
+      select: {
+        giverId: true,
+      },
+    });
+
+    const myGiverIds = myGivers.map((m) => m.giverId);
+
+    // Get all participants except the giver and their givers
     const participants = await db.participant.findMany({
       where: {
         eventId,
@@ -51,9 +64,11 @@ export async function matchParticipant({
       },
     });
 
-    // Filter out participants who already have a gift giver for this activity
+    // Filter out participants who:
+    // 1. Already have a gift giver for this activity
+    // 2. Are giving to the current participant (circular gifting prevention)
     const availableReceivers = participants.filter(
-      (p) => p.receivingFrom.length === 0,
+      (p) => p.receivingFrom.length === 0 && !myGiverIds.includes(p.id),
     );
 
     if (availableReceivers.length === 0) {
@@ -170,17 +185,35 @@ export async function rematchParticipant({
   /**
    * @operation
    *
+   * Get participants who are giving to this participant (their givers)
+   */
+  const myGivers = await db.match.findMany({
+    where: {
+      activityId: giftingActivity.id,
+      receiverId: participant.id,
+    },
+    select: {
+      giverId: true,
+    },
+  });
+
+  const myGiverIds = myGivers.map((m) => m.giverId);
+
+  /**
+   * @operation
+   *
    * Search for new pairs
    * We filter out participants who:
    * 1. Are the same as the giver
    * 2. Have been matched before with this giver
    * 3. Already have a gift giver for this gifting activity
+   * 4. Are giving to this participant (circular gifting prevention)
    */
   const availableReceivers = await db.participant.findMany({
     where: {
       eventId,
       NOT: {
-        OR: [{ id: participant.id }, { userId: { in: previousReceivers } }],
+        OR: [{ id: participant.id }, { userId: { in: previousReceivers } }, { id: { in: myGiverIds } }],
       },
       receivingFrom: {
         none: {

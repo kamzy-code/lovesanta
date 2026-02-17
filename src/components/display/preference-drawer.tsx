@@ -1,7 +1,7 @@
 "use client";
 
 import { Center, Float, Stack, Text } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 import {
   DrawerBackdrop,
   DrawerBody,
@@ -11,83 +11,82 @@ import {
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
-  DrawerTrigger,
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import { Avatar } from "~/components/ui/avatar";
 import { FiChevronRight } from "react-icons/fi";
-import { type Participant, type User, type Event } from "@prisma/client";
+import { type Participant, type User } from "@prisma/client";
 import { api } from "~/trpc/react";
-import { useRouter } from "next/navigation";
+import { Toaster, toaster } from "../ui/toaster";
 
-type CombinedParticipantWithUserAndEvent = Participant & {
-  user?: Pick<User, "firstName" | "id" | "image" | "email">;
-  event?: Event;
+type GiftingDrawerConfig = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  participantId: string;
+  eventId: string;
+  activityId: string;
+  receiver?: Participant & { user?: Pick<User, "firstName" | "id" | "image" | "email"> };
+  attemptsRemaining: number;
 };
 
-type PreferenceDrawerConfig = {
-  participants: {
-    giver: CombinedParticipantWithUserAndEvent;
-    receiver: CombinedParticipantWithUserAndEvent;
-  };
-  event: Event;
-  attemptsCount: number;
-};
-
-export default function PairPreferenceDrawer({
-  participants,
-  event,
-  attemptsCount,
-}: PreferenceDrawerConfig) {
-  const [open, setOpen] = useState(false);
+export function PairPreferenceDrawer({
+  open,
+  onOpenChange,
+  participantId,
+  eventId,
+  activityId,
+  receiver,
+  attemptsRemaining,
+}: GiftingDrawerConfig) {
 
   const utils = api.useUtils();
-  const router = useRouter();
+  const toast = toaster.create;
 
-  const regeneratePairMutation = api.post.regenerateGiverPair.useMutation({
+  const generateMatchMutation = api.gifting.generateMatch.useMutation({
     onSuccess: async () => {
-      await utils.post.invalidate();
-      router.refresh();
-      setOpen(false);
+      await utils.gifting.getCurrentMatch.invalidate({
+        participantId,
+        eventId,
+        activityId,
+      });
+      onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "New pair generated!",
+        type: "success",
+        duration: 3000,
+      });
     },
-
     onError: async (error) => {
       console.error(error);
-      alert(error.message);
-      await utils.post.invalidate();
+      toast({
+        title: "Error",
+        description: error.message,
+        type: "error",
+        duration: 3000,
+      });
     },
   });
 
-  const giverName = participants.giver.user?.firstName || "Bukola Santa";
-  const receiverName = participants.receiver.user?.firstName|| "Elena Doe";
+  const giverName = "You";
+  const receiverName = receiver?.user?.firstName || "Secret Person";
 
   return (
     <DrawerRoot
       placement={"bottom"}
       open={open}
-      onOpenChange={(e) => setOpen(e.open)}
+      onOpenChange={(e) => onOpenChange(e.open)}
       size={"xl"}
     >
       <DrawerBackdrop />
-      <DrawerTrigger asChild>
-        <Button
-          _hover={{ opacity: 0.8 }}
-          bg="teal.800"
-          color={"gray.50"}
-          size="xl"
-          fontFamily={"Sole Sans"}
-          rounded={"lg"}
-        >
-          Don&apos;t like this pair? Generate a new pair
-        </Button>
-      </DrawerTrigger>
-      <DrawerTrigger />
       <DrawerContent minH={"50vh"} pt={12} borderTopRadius={"3xl"}>
         <DrawerCloseTrigger />
 
+        <Toaster />
         <Center rotate={"8"} ml={"-24"} py={8} fontFamily={"Pixeboy"}>
           <Avatar
             name={giverName}
+            color={'gray.100'}
             borderRadius={"xl"}
             rotate={"-16"}
             w={"32"}
@@ -104,6 +103,7 @@ export default function PairPreferenceDrawer({
             <Float offset="-8" placement="middle-end" boxSize="24" top={20}>
               <Avatar
                 rotate={"28"}
+                color={'gray.100'}
                 borderRadius={"xl"}
                 bg="linear-gradient(40deg, black, purple, #81f242)"
                 w={"32"}
@@ -137,29 +137,30 @@ export default function PairPreferenceDrawer({
           mx={"auto"}
         >
           <Text maxW={"xs"}>
-            Hi, {giverName}, you have been paired with{" "}
-            <strong>{receiverName} 😆 </strong> while this is not permanent, if
-            you do not like <span>{receiverName} </span>
-            and would like to randomly pair with another person, click the
-            button below to try your luck.
+            {`Hi! You've been assigned to gift `}
+            <strong>{receiverName} 🎁</strong> {`. If you'd like a different match,
+            you can generate a new pair below. You have `}
+            <strong>{attemptsRemaining} attempt{attemptsRemaining !== 1 ? "s" : ""}</strong>{" "}
+            remaining.
           </Text>
 
           <Stack mt={10}>
             <Button
               mt={4}
               ring={"1px"}
-              disabled={attemptsCount >= 3}
-              aria-disabled={attemptsCount >= 3}
+              disabled={attemptsRemaining === 0}
+              aria-disabled={attemptsRemaining === 0}
               ringColor={"bg.subtle"}
               boxShadow={"lg"}
               variant="subtle"
               size="md"
               rounded={"l3"}
-              loading={regeneratePairMutation.isPending}
+              loading={generateMatchMutation.isPending}
               onClick={async () => {
-                void regeneratePairMutation.mutate({
-                  eventId: event.id,
-                  participantId: participants.giver.id,
+                void generateMatchMutation.mutate({
+                  participantId,
+                  activityId,
+                  eventId,
                 });
               }}
             >

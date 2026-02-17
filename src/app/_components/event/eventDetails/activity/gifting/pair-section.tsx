@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Box,
   Card,
@@ -27,8 +28,8 @@ import {
 } from "react-icons/lu";
 import { Avatar } from "~/components/ui/avatar";
 import { RetryIndicator } from "~/app/_components/event-pair/retry-indicator";
+import { PairPreferenceDrawer } from "~/components/display/preference-drawer";
 import { Suspense } from "react";
-import PairPreferenceDrawer from "~/components/display/preference-drawer";
 import { PreviousConnections } from "~/app/_components/event-pair/previous-connections";
 import { ConfettiComponent } from "~/components/display/confetti";
 
@@ -45,6 +46,7 @@ export function PairSection({
   activityId,
   activityStatus,
 }: PairSectionProps) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const toast = toaster.create;
   const utils = api.useUtils();
 
@@ -74,7 +76,7 @@ export function PairSection({
       },
     });
 
-  const handleGeneratePair = () => {
+  const handleOpenDrawer = () => {
     if (matchData?.attemptsRemaining === 0) {
       toast({
         title: "No Attempts Left",
@@ -84,11 +86,7 @@ export function PairSection({
       });
       return;
     }
-    generatePair({
-      participantId,
-      activityId,
-      eventId,
-    });
+    setDrawerOpen(true);
   };
 
   const isActivityActive = true; //activityStatus === "ACTIVE";
@@ -150,7 +148,13 @@ export function PairSection({
                   boxShadow="0 0 100px #008f0050, 0 0 20px #008f0010, 0 0 30px #20802040, 0 0 40px #008f00, 0 0 50px #208020, 0 0 60px #008f00, 0 0 70px #208020"
                   color="white"
                   _hover={{ bg: "green.600" }}
-                  onClick={handleGeneratePair}
+                  onClick={async () => {
+                void generatePair({
+                  participantId,
+                  activityId,
+                  eventId,
+                });
+              }}
                   disabled={isGenerating}
                 >
                   GENERATE
@@ -278,8 +282,8 @@ export function PairSection({
         <Button
           flex={1}
           variant="outline"
-          onClick={handleGeneratePair}
-          disabled={isGenerating || attemptsRemaining === 0}
+          onClick={handleOpenDrawer}
+          disabled={attemptsRemaining === 0}
         >
           {isGenerating ? (
             <>
@@ -296,6 +300,17 @@ export function PairSection({
           )}
         </Button>
       </HStack>
+
+      {/* Pair Selection Drawer */}
+      <PairPreferenceDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        participantId={participantId}
+        eventId={eventId}
+        activityId={activityId}
+        receiver={matchData?.match?.receiver}
+        attemptsRemaining={attemptsRemaining}
+      />
     </Stack>
   );
 }
