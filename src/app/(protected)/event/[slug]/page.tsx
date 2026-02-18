@@ -11,7 +11,6 @@ export default async function EventDetails({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  console.log({ slug });
   return (
     <Suspense fallback={<PageLoader/>}>
       <Container maxW="6xl">

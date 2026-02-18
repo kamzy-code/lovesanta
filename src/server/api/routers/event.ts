@@ -54,6 +54,35 @@ export const eventRouter = createTRPCRouter({
       return event;
     }),
 
+    // Delete an event
+    deleteEvent: protectedProcedure
+      .input(z.object({ eventId: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const event = await ctx.db.event.findUnique({
+          where: { id: input.eventId },
+        });
+
+        if (!event) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Event not found.",
+          });
+        }
+
+        if (event.creatorId !== ctx.session.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You can only delete events you created.",
+          });
+        }
+
+        await ctx.db.event.delete({
+          where: { id: input.eventId },
+        });
+
+        return { success: true };
+      }),
+
   // Join an event
   joinEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
@@ -73,6 +102,25 @@ export const eventRouter = createTRPCRouter({
         });
       }
     }),
+
+    // Leave an event
+    leaveEvent: protectedProcedure
+      .input(z.object({ eventId: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const participant = await ctx.db.participant.deleteMany({
+          where: {
+            eventId: input.eventId,
+            userId: ctx.session.user.id,
+          },
+        });
+        if (participant.count === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "You are not a participant in this event.",
+          });
+        }
+        return participant;
+      }),
 
   // Fetch all events a user belongs to
   fetchAlEvents: protectedProcedure.query(async ({ ctx }) => {

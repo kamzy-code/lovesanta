@@ -7,7 +7,7 @@ import {
   VStack,
   HStack,
 } from "@chakra-ui/react";
-import { RetryIndicator } from "./retry-indicator";
+import { RetryIndicator } from "../../../components/display/retry-indicator";
 import { type Participant, type User, type Event } from "@prisma/client";
 import { LuGlobe } from "react-icons/lu";
 

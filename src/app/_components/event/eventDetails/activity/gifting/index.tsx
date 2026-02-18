@@ -11,29 +11,31 @@ interface GiftingActivityProps {
   activity: Activity;
   eventId: string;
   participantId: string;
+  isCreator: boolean;
 }
 
 export function GiftingActivity({
   activity,
   eventId,
   participantId,
+  isCreator,
 }: GiftingActivityProps) {
   return (
     <Container maxW="5xl" py={12}>
       <Tabs.Root
-        defaultValue="wishlist"
+        defaultValue="pair"
         display="flex"
         flexDirection="column"
         gap={6}
       >
         <Tabs.List>
-          <Tabs.Trigger value="wishlist">
-            <LuList />
-            My Wishlist
-          </Tabs.Trigger>
           <Tabs.Trigger value="pair">
             <LuGift />
             My Pair
+          </Tabs.Trigger>
+          <Tabs.Trigger value="wishlist">
+            <LuList />
+            My Wishlist
           </Tabs.Trigger>
           <Tabs.Trigger value="history">
             <LuHistory />
@@ -51,10 +53,7 @@ export function GiftingActivity({
           }}
         >
           <Tabs.Content value="wishlist">
-            <WishlistSection
-              eventId={eventId}
-              participantId={participantId}
-            />
+            <WishlistSection eventId={eventId} participantId={participantId} />
           </Tabs.Content>
 
           <Tabs.Content value="pair">
@@ -62,7 +61,7 @@ export function GiftingActivity({
               eventId={eventId}
               participantId={participantId}
               activityId={activity.id}
-              activityStatus={activity.status}
+              isCreator={isCreator}
             />
           </Tabs.Content>
 

@@ -109,11 +109,32 @@ export const activityRouter = createTRPCRouter({
         });
       }
 
+      const event = await ctx.db.event.findUnique({
+        where: { id: activity?.eventId },
+        include: { participants: true },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
       if (activity?.event.creatorId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You don't have permission to complete this action.",
         });
+      }
+
+      if (activity.type === "GIFTING") {
+        if (event.participants.length < 3) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "At least 3 participants are required to start the gifting activity.",
+          });
+        }
       }
 
       return await ctx.db.activity.update({

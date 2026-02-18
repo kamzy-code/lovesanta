@@ -11,44 +11,43 @@ import {
   Text,
   Badge,
   Heading,
-  Spacer,
   Span,
-  Container,
   Center,
+  Spacer,
 } from "@chakra-ui/react";
 import { toaster } from "~/components/ui/toaster";
 import { type ActivityStatus } from "@prisma/client";
 import { api } from "~/trpc/react";
-import {
-  LuRefreshCw,
-  LuLoader,
-  LuGift,
-  LuCircleAlert,
-  LuEye,
-} from "react-icons/lu";
+import { LuRefreshCw, LuLoader, LuGift, LuCircleAlert } from "react-icons/lu";
 import { Avatar } from "~/components/ui/avatar";
-import { RetryIndicator } from "~/app/_components/event-pair/retry-indicator";
+import { RetryIndicator } from "~/components/display/retry-indicator";
 import { PairPreferenceDrawer } from "~/components/display/preference-drawer";
-import { Suspense } from "react";
-import { PreviousConnections } from "~/app/_components/event-pair/previous-connections";
 import { ConfettiComponent } from "~/components/display/confetti";
+import { ActivityControls } from "./activityControls";
 
 interface PairSectionProps {
   eventId: string;
   participantId: string;
   activityId: string;
-  activityStatus: ActivityStatus;
+  isCreator: boolean;
 }
 
 export function PairSection({
   eventId,
   participantId,
   activityId,
-  activityStatus,
+  isCreator,
 }: PairSectionProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const toast = toaster.create;
   const utils = api.useUtils();
+
+  // Fetch activity status to ensure it updates when changed
+  const { data: activityData } = api.activity.getActivityById.useQuery({
+    activityId,
+  });
+
+  const activityStatus = activityData?.status ?? "PENDING";
 
   // Fetch current match and history
   const { data: matchData, isLoading } = api.gifting.getCurrentMatch.useQuery({
@@ -89,7 +88,7 @@ export function PairSection({
     setDrawerOpen(true);
   };
 
-  const isActivityActive = true; //activityStatus === "ACTIVE";
+  const isActivityActive = activityStatus === "ACTIVE";
   const hasMatch = matchData?.match;
   const attemptsRemaining = matchData?.attemptsRemaining ?? 3;
 
@@ -106,7 +105,7 @@ export function PairSection({
     );
   }
 
-  if (!isActivityActive) {
+  if (!isActivityActive && !hasMatch) {
     return (
       <Card.Root>
         <Card.Body>
@@ -117,6 +116,12 @@ export function PairSection({
               The gifting activity hasn&apos;t started yet. Please wait for the
               event organizer to begin the activity.
             </Text>
+            {isCreator && (
+              <ActivityControls
+                activityId={activityId}
+                activityStatus={activityStatus}
+              />
+            )}
           </VStack>
         </Card.Body>
       </Card.Root>
@@ -127,6 +132,13 @@ export function PairSection({
     return (
       <Card.Root>
         <Card.Body>
+            {isCreator && (
+            <ActivityControls
+              activityId={activityId}
+              activityStatus={activityStatus}
+            />
+          )}
+
           <VStack gap={16} align="stretch" py={12}>
             <VStack gap={3} align="center">
               <Box as={LuGift} fontSize="2xl" />
@@ -148,13 +160,13 @@ export function PairSection({
                   boxShadow="0 0 100px #008f0050, 0 0 20px #008f0010, 0 0 30px #20802040, 0 0 40px #008f00, 0 0 50px #208020, 0 0 60px #008f00, 0 0 70px #208020"
                   color="white"
                   _hover={{ bg: "green.600" }}
-                  onClick={async () => {
-                void generatePair({
-                  participantId,
-                  activityId,
-                  eventId,
-                });
-              }}
+                  onClick={() => {
+                    void generatePair({
+                      participantId,
+                      activityId,
+                      eventId,
+                    });
+                  }}
                   disabled={isGenerating}
                 >
                   GENERATE
@@ -171,6 +183,14 @@ export function PairSection({
 
   return (
     <Stack gap={4}>
+      {/* Activity Controls - Creator Only */}
+      {isCreator && (
+        <ActivityControls
+          activityId={activityId}
+          activityStatus={activityStatus}
+        />
+      )}
+
       {/* Match Card */}
 
       <ConfettiComponent show={true} />
@@ -278,28 +298,37 @@ export function PairSection({
       </Card.Root>
 
       {/* Action Buttons */}
-      <HStack gap={3} justify="space-between">
-        <Button
-          flex={1}
-          variant="outline"
-          onClick={handleOpenDrawer}
-          disabled={attemptsRemaining === 0}
-        >
-          {isGenerating ? (
-            <>
-              <LuLoader className="animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <LuRefreshCw />
-              {attemptsRemaining > 0
-                ? `Dont' like this pair? Generate a new pair (${attemptsRemaining} left)`
-                : "No Attempts Left"}
-            </>
-          )}
-        </Button>
-      </HStack>
+      {isActivityActive && (
+        <HStack gap={3} justify="space-between">
+          <Button
+            flex={1}
+            variant="outline"
+            onClick={handleOpenDrawer}
+            disabled={attemptsRemaining === 0}
+          >
+            {isGenerating ? (
+              <>
+                <LuLoader className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <LuRefreshCw />
+                {attemptsRemaining > 0
+                  ? `Dont' like this pair? Generate a new pair (${attemptsRemaining} left)`
+                  : "No Attempts Left"}
+              </>
+            )}
+          </Button>
+        </HStack>
+      )}
+
+      {!isActivityActive && (
+        <Text color="fg.muted" textAlign="center" fontStyle="italic">
+          The activity is no longer active. Please wait for the organizer to
+          restart the activity to change your pair.
+        </Text>
+      )}
 
       {/* Pair Selection Drawer */}
       <PairPreferenceDrawer
