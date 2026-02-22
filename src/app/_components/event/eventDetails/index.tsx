@@ -6,6 +6,8 @@ import {
   Flex,
   Heading,
   HStack,
+  Menu,
+  Portal,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -17,6 +19,9 @@ import { api } from "~/trpc/server";
 import { EventTabs } from "./tabLayout";
 import { auth } from "~/server/auth";
 import { JoinEvent, LoginToJoin, ShareEvent } from "./ctaButtons";
+import { KebabMenu } from "~/components/ui/kebabMenu";
+import { redirect } from "next/navigation";
+import { EventKebabMenu } from "./eventKebabMenu";
 
 export async function EventDetailsComponent({ slug }: { slug: string }) {
   const session = await auth();
@@ -24,6 +29,41 @@ export async function EventDetailsComponent({ slug }: { slug: string }) {
   const hasJoined = event?.participants.some(
     (p) => p.userId === session?.user.id,
   );
+  const isCreator = event?.creatorId === session?.user.id;
+
+  if (!event) {
+    return (
+      <Container minH={"vh"} py={{ base: "12", md: "24" }}>
+        <AbsoluteCenter flexDir={"column"} gap={4}>
+          <Heading>Event Not Found</Heading>
+
+          <Link href={"/home"}>
+            <Button variant={"outline"} size={"lg"} border={"1px solid"}>
+              Back
+            </Button>
+          </Link>
+        </AbsoluteCenter>
+      </Container>
+    );
+  }
+
+  const handleLeaveEvent = async () => {
+    try {
+      await api.event.leaveEvent({ eventId: event.id });
+      redirect("/home");
+    } catch (error) {
+      console.error("Failed to leave event", error);
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    try {
+      await api.event.deleteEvent({ eventId: event.id });
+      redirect("/home");
+    } catch (error) {
+      console.error("Failed to delete event", error);
+    }
+  };
 
   if (!event) {
     return (
@@ -50,11 +90,15 @@ export async function EventDetailsComponent({ slug }: { slug: string }) {
     >
       <Box spaceY={"6"} flexShrink={0}>
         {session && (
-          <Link href={"/home"}>
-            <Button variant={"outline"} size={"lg"} border={"1px solid"}>
-              Back
-            </Button>
-          </Link>
+          <HStack justify={"space-between"}>
+            <Link href={"/home"}>
+              <Button variant={"outline"} size={"lg"} border={"1px solid"}>
+                Back
+              </Button>
+            </Link>
+
+           <EventKebabMenu isCreator={isCreator} handleLeaveEvent={handleLeaveEvent} handleDeleteEvent={handleDeleteEvent}/>
+          </HStack>
         )}
 
         <Stack gap="6">

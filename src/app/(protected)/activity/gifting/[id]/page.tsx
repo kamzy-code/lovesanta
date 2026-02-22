@@ -1,27 +1,20 @@
 import { Container } from "@chakra-ui/react";
+import { Suspense } from "react";
 import { GiftingActivity } from "~/app/_components/event/eventDetails/activity/gifting";
-import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
+import { PageLoader } from "~/components/ui/pageLoader";
 
 export default async function GiftingActivityPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await auth();
   const { id } = await params;
-  const activity = await api.activity.getActivityById({ activityId: id });
-  const isCreator = activity.event.creatorId === session?.user.id;
+
   return (
-    <HydrateClient>
+    <Suspense fallback={<PageLoader />}>
       <Container>
-        <GiftingActivity
-          activity={activity}
-          eventId={activity?.eventId}
-          participantId={activity.currentUserParticipantId!}
-          isCreator={isCreator}
-        />
+        <GiftingActivity activityId={id} />
       </Container>
-    </HydrateClient>
+    </Suspense>
   );
 }

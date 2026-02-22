@@ -21,30 +21,18 @@ export function ActivityList({ eventId, isCreator }: ActivityListProps) {
     return <Center pt={12}>Error loading activities</Center>;
   }
 
-  const getActivityHref = (activity: Activity): string => {
-    const baseMap: Record<string, string> = {
-      GIFTING: "activity/gifting",
-      // Add other activity types as needed
-    };
-    const base = baseMap[activity.type] ?? "activity/activity";
-    return `/${base}/${activity.id}`;
-  };
-
-  if (isPending){
+  if (isPending) {
     return <Center pt={12}>...Loading</Center>;
   }
   return (
     <Container>
-      {(activities.length === 0 && !isPending) ? (
+      {activities.length === 0 && !isPending ? (
         <Center pt={12}>This event has no activities</Center>
       ) : (
         activities.map((activity) => {
           return (
-
             <Box key={activity.id}>
-              <Link href={getActivityHref(activity)}>
               <ActivityCard activity={activity} isCreator={isCreator} />
-              </Link>
             </Box>
           );
         })

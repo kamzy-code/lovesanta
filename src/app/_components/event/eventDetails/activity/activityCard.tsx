@@ -8,9 +8,12 @@ import {
   Icon,
   Menu,
   Portal,
+  VStack,
 } from "@chakra-ui/react";
 import { Activity } from "@prisma/client";
-import { FiPlay, FiGift } from "react-icons/fi";
+import Link from "next/link";
+import { FiPlay, FiGift, FiMenu } from "react-icons/fi";
+import { KebabMenu } from "~/components/ui/kebabMenu";
 import { api } from "~/trpc/react";
 
 interface ActivityProps {
@@ -20,6 +23,15 @@ interface ActivityProps {
 export const ActivityCard = ({ activity, isCreator }: ActivityProps) => {
   const isGifting = activity.type === "GIFTING";
   const utils = api.useUtils();
+
+  const getActivityHref = (activity: Activity): string => {
+    const baseMap: Record<string, string> = {
+      GIFTING: "activity/gifting",
+      // Add other activity types as needed
+    };
+    const base = baseMap[activity.type] ?? "activity/activity";
+    return `/${base}/${activity.id}`;
+  };
 
   const { mutate: deleteActivty, isPending } =
     api.activity.deleteActivity.useMutation({
@@ -65,62 +77,34 @@ export const ActivityCard = ({ activity, isCreator }: ActivityProps) => {
   return (
     <Box
       border="1px solid black"
-      p={4}
       mb={3}
       _hover={{ borderColor: "green.400" }}
       transition="0.2s"
     >
-      {/* {isPending && (
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          bottom={0}
-          bg="blackAlpha.500"
-          zIndex={1}
-        >
-          <Text textAlign="center" mt="20%">
-            Deleting...
-          </Text>
-        </Box>
-      )} */}
-
       <HStack justify="space-between">
-        <HStack gap={4}>
-          <Icon as={isGifting ? FiGift : FiPlay} boxSize={5} />
-          <Box>
-            <Text fontWeight="bold" textTransform="uppercase">
-              {activity.type.replace("_", " ")}
-            </Text>
-            <Badge
-              variant="outline"
-              colorScheme={activity.status === "ACTIVE" ? "green" : "gray"}
-            >
-              {activity.status}
-            </Badge>
-          </Box>
-        </HStack>
+        <Link href={getActivityHref(activity)} style={{ flex: 1}}>
+          <HStack gap={4}   p={4}>
+            <Icon as={isGifting ? FiGift : FiPlay} boxSize={5} />
+            <Box>
+              <Text fontWeight="bold" textTransform="uppercase">
+                {activity.type.replace("_", " ")}
+              </Text>
+              <Badge
+                variant="outline"
+                colorScheme={activity.status === "ACTIVE" ? "green" : "gray"}
+              >
+                {activity.status}
+              </Badge>
+            </Box>
+          </HStack>
+        </Link>
 
-        <HStack>
-          {/* Admin Controls */}
-          {/* {isCreator && activity.status === "PENDING" && (
-            <Button
-              size="sm"
-              variant="outline"
-              _hover={{ bg: "green.600/80", color: "black" }}
-              onClick={() => onStart(activity.id)}
-            >
-              <FiPlay />
-              START
-            </Button>
-          )} */}
-
+        <HStack onClick={(e) => e.stopPropagation()}>
           {isCreator && (
             <Menu.Root>
-              <Menu.Trigger asChild>
-                <Button variant="outline" size="sm">
-                  Open
+              <Menu.Trigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm">
+                  <KebabMenu />
                 </Button>
               </Menu.Trigger>
               <Portal>
