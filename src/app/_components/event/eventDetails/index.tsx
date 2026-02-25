@@ -6,8 +6,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Menu,
-  Portal,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -19,8 +17,6 @@ import { api } from "~/trpc/server";
 import { EventTabs } from "./tabLayout";
 import { auth } from "~/server/auth";
 import { JoinEvent, LoginToJoin, ShareEvent } from "./ctaButtons";
-import { KebabMenu } from "~/components/ui/kebabMenu";
-import { redirect } from "next/navigation";
 import { EventKebabMenu } from "./eventKebabMenu";
 
 export async function EventDetailsComponent({ slug }: { slug: string }) {
@@ -46,24 +42,6 @@ export async function EventDetailsComponent({ slug }: { slug: string }) {
       </Container>
     );
   }
-
-  const handleLeaveEvent = async () => {
-    try {
-      await api.event.leaveEvent({ eventId: event.id });
-      redirect("/home");
-    } catch (error) {
-      console.error("Failed to leave event", error);
-    }
-  };
-
-  const handleDeleteEvent = async () => {
-    try {
-      await api.event.deleteEvent({ eventId: event.id });
-      redirect("/home");
-    } catch (error) {
-      console.error("Failed to delete event", error);
-    }
-  };
 
   if (!event) {
     return (
@@ -97,7 +75,7 @@ export async function EventDetailsComponent({ slug }: { slug: string }) {
               </Button>
             </Link>
 
-           <EventKebabMenu isCreator={isCreator} handleLeaveEvent={handleLeaveEvent} handleDeleteEvent={handleDeleteEvent}/>
+            <EventKebabMenu isCreator={isCreator} eventId={event.id} />
           </HStack>
         )}
 

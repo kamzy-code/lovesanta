@@ -2,7 +2,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { unstable_cache } from "next/cache";
 
 export const eventRouter = createTRPCRouter({
   //PUBLIC PROCEDURES
@@ -54,34 +53,65 @@ export const eventRouter = createTRPCRouter({
       return event;
     }),
 
-    // Delete an event
-    deleteEvent: protectedProcedure
-      .input(z.object({ eventId: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        const event = await ctx.db.event.findUnique({
-          where: { id: input.eventId },
+  // Delete an event
+  deleteEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const event = await ctx.db.event.findUnique({
+        where: { id: input.eventId },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found.",
         });
+      }
 
-        if (!event) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Event not found.",
-          });
-        }
-
-        if (event.creatorId !== ctx.session.user.id) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You can only delete events you created.",
-          });
-        }
-
-        await ctx.db.event.delete({
-          where: { id: input.eventId },
+      if (event.creatorId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only delete events you created.",
         });
+      }
 
-        return { success: true };
-      }),
+      // Get all participant IDs for this event
+      const participants = await ctx.db.participant.findMany({
+        where: { eventId: input.eventId },
+        select: { id: true },
+      });
+
+      const participantIds = participants.map((p) => p.id);
+
+      // Delete all matches where any participant is the giver
+      if (participantIds.length > 0) {
+        await ctx.db.match.deleteMany({
+          where: {
+            OR: [
+              { giverId: { in: participantIds } },
+              { receiverId: { in: participantIds } },
+            ],
+          },
+        });
+      }
+
+      // Delete all activities for this event
+      await ctx.db.activity.deleteMany({
+        where: { eventId: input.eventId },
+      });
+
+      // Delete all participants
+      await ctx.db.participant.deleteMany({
+        where: { eventId: input.eventId },
+      });
+
+      // Finally delete the event
+      await ctx.db.event.delete({
+        where: { id: input.eventId },
+      });
+
+      return { success: true };
+    }),
 
   // Join an event
   joinEvent: protectedProcedure
@@ -103,50 +133,61 @@ export const eventRouter = createTRPCRouter({
       }
     }),
 
-    // Leave an event
-    leaveEvent: protectedProcedure
-      .input(z.object({ eventId: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        const participant = await ctx.db.participant.deleteMany({
-          where: {
-            eventId: input.eventId,
-            userId: ctx.session.user.id,
-          },
+  // Leave an event
+  leaveEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // First, find the participant to get their ID
+      const participant = await ctx.db.participant.findFirst({
+        where: {
+          eventId: input.eventId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (!participant) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "You are not a participant in this event.",
         });
-        if (participant.count === 0) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "You are not a participant in this event.",
-          });
-        }
-        return participant;
-      }),
+      }
+
+      // Delete all matches where this participant is the giver
+      await ctx.db.match.deleteMany({
+        where: {
+          OR: [{ giverId: participant.id }, { receiverId: participant.id }],
+        },
+      });
+
+      // Now delete the participant
+      const result = await ctx.db.participant.delete({
+        where: {
+          id: participant.id,
+        },
+      });
+
+      return result;
+    }),
 
   // Fetch all events a user belongs to
   fetchAlEvents: protectedProcedure.query(async ({ ctx }) => {
-    return unstable_cache(
-      async () => {
-        const { id } = ctx.session.user;
-        const events = await ctx.db.event.findMany({
-          where: {
-            OR: [
-              { creatorId: id }, // Events I created
-              { participants: { some: { userId: id } } }, // Events I joined
-            ],
-          },
-          include: {
-            participants: true,
-            creator: true,
-          },
-          orderBy: {
-            date: "asc",
-          },
-        });
-        return events;
+    const { id } = ctx.session.user;
+    const events = await ctx.db.event.findMany({
+      where: {
+        OR: [
+          { creatorId: id }, // Events I created
+          { participants: { some: { userId: id } } }, // Events I joined
+        ],
       },
-      [`user-events-${ctx.session.user.id}`],
-      { revalidate: 60 }, // Revalidate every 60 seconds
-    )();
+      include: {
+        participants: true,
+        creator: true,
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+    return events;
   }),
 
   //

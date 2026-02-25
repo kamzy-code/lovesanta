@@ -1,7 +1,7 @@
-import { Box, Container, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Container, HStack, Stack, Text, } from "@chakra-ui/react";
 import { Avatar } from "~/components/ui/avatar";
 import { auth } from "~/server/auth";
-import { ParticipantWithUser } from "~/types";
+import { type ParticipantWithUser } from "~/types";
 
 export const ParticipantList = async ({
   participants,
@@ -26,9 +26,9 @@ export const ParticipantList = async ({
           </Stack>
           <Box>
             <Text fontWeight={"bold"}>You</Text>
-            <Text color={"fg.muted"}>
+            {/* <Text color={"fg.muted"}>
               {`Wishlist: ${you.wishlist ?? "Anything"}`}
-            </Text>
+            </Text> */}
           </Box>
         </HStack>
       )}
@@ -50,9 +50,9 @@ export const ParticipantList = async ({
               </Stack>
               <Box>
                 <Text fontWeight={"bold"}>{participant.user.username}</Text>
-                <Text color={"fg.muted"}>
+                {/* <Text color={"fg.muted"}>
                   {`Wishlist: ${participant.wishlist ?? "Anything"}`}
-                </Text>
+                </Text> */}
               </Box>
             </HStack>
           );

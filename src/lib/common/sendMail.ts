@@ -1,7 +1,8 @@
 "server-only";
 
-import { baseURL } from "routes";
 import { sendEmail } from "./mailTranspot";
+
+const baseURL = process.env.BASE_URL;
 
 // VERIFICATION EMAIL AND HELPERS
 export const sendVerificationTokenMail = async (to: string, token: string) => {

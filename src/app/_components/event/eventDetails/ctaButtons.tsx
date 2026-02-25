@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { LuLink } from "react-icons/lu";
-import { baseURL } from "routes";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -15,6 +14,8 @@ interface JoinEventProps {
 interface EventCTAProps {
   slug: string;
 }
+
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const JoinEvent = ({ eventId }: JoinEventProps) => {
   const { mutate: joinEvent, isPending } = api.event.joinEvent.useMutation({

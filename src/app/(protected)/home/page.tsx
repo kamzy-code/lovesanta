@@ -1,10 +1,8 @@
 import { HydrateClient } from "~/trpc/server";
-
 import { EventFeedComponent } from "~/app/_components/event/event-feed";
-import { NavbarComponent } from "~/components/navbar/block";
 import { Container } from "@chakra-ui/react";
 import { Suspense } from "react";
-import { EventFeedSkeleton } from "~/app/_components/event/event-feed/skeleton";
+import { PageLoader } from "~/components/ui/pageLoader";
 
 export default async function Home() {
   /**
@@ -23,7 +21,7 @@ export default async function Home() {
   return (
     <HydrateClient>
       <Container maxW="6xl" pb={24}>
-        <Suspense fallback={<EventFeedSkeleton />}>
+        <Suspense fallback={<PageLoader/>}>
           <EventFeedComponent />
         </Suspense>
       </Container>

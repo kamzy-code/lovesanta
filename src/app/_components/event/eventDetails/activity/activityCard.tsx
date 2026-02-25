@@ -8,11 +8,10 @@ import {
   Icon,
   Menu,
   Portal,
-  VStack,
 } from "@chakra-ui/react";
-import { Activity } from "@prisma/client";
+import { type Activity } from "@prisma/client";
 import Link from "next/link";
-import { FiPlay, FiGift, FiMenu } from "react-icons/fi";
+import { FiPlay, FiGift, } from "react-icons/fi";
 import { KebabMenu } from "~/components/ui/kebabMenu";
 import { api } from "~/trpc/react";
 
@@ -33,7 +32,7 @@ export const ActivityCard = ({ activity, isCreator }: ActivityProps) => {
     return `/${base}/${activity.id}`;
   };
 
-  const { mutate: deleteActivty, isPending } =
+  const { mutate: deleteActivty, isPending: isDeleting } =
     api.activity.deleteActivity.useMutation({
       onMutate: async ({ activityId }) => {
         // Cancel ongoing queries to prevent overwriting optimistic update

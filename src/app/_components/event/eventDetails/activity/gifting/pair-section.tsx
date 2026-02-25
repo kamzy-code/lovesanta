@@ -9,14 +9,11 @@ import {
   HStack,
   Button,
   Text,
-  Badge,
   Heading,
   Span,
   Center,
-  Spacer,
 } from "@chakra-ui/react";
 import { toaster } from "~/components/ui/toaster";
-import { type ActivityStatus } from "@prisma/client";
 import { api } from "~/trpc/react";
 import { LuRefreshCw, LuLoader, LuGift, LuCircleAlert } from "react-icons/lu";
 import { Avatar } from "~/components/ui/avatar";

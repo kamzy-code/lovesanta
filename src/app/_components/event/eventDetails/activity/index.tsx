@@ -1,10 +1,7 @@
 "use client";
 import { Box, Center, Container } from "@chakra-ui/react";
-
 import { ActivityCard } from "./activityCard";
-import { type Activity } from "@prisma/client";
 import { api } from "~/trpc/react";
-import Link from "next/link";
 
 interface ActivityListProps {
   eventId: string;

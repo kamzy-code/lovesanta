@@ -2,8 +2,6 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { authConfig } from "./config";
 import { db } from "../db";
-import { encode } from "next-auth/jwt";
-import { nanoid } from "nanoid";
 import Credentials from "next-auth/providers/credentials";
 import { loginSchema } from "~/schemas";
 import { getUserByEmail, getUserById } from "~/lib/db/users";
@@ -136,7 +134,7 @@ const {
      */
 
     async jwt({ token, user, account }) {
-      console.log({ token, user, account, from: "[jwt callback]" });
+      // console.log({ token, user, account, from: "[jwt callback]" });
 
       if (!token.sub) return token;
 
@@ -156,7 +154,7 @@ const {
      * @returns User & Session
      */
     async session({ token, session, user }) {
-      console.log({ session, token, user, from: "[session callback]" });
+      // console.log({ session, token, user, from: "[session callback]" });
 
       if (token.sub && session.user) {
         session.user.id = token.sub;

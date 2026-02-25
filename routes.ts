@@ -27,14 +27,6 @@ export const authRoutes = ["/auth/login", "/auth/signup",'/auth/reset-password',
 export const apiAuthPrefix = "/api/auth";
 
 /**
- * The prefix for API authentication routes.
- * Routes that start with this prefix are handled by Auth.js. and used for Authentication.
- * @type {string}
- */
-export const baseURL = "http://localhost:3000";
-
-
-/**
  * The default redirect path after logging in
  */
 export const DEFAULT_LOGIN_REDIRECT = "/home";

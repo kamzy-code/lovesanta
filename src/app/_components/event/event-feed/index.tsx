@@ -1,5 +1,6 @@
 import {
   Badge,
+  Center,
   Container,
   Flex,
   Heading,
@@ -10,22 +11,27 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Status } from "~/components/ui/status";
-import { LuChevronRight, LuUser } from "react-icons/lu";
+import { LuChevronRight, LuUser,} from "react-icons/lu";
 import { calculateDaysAgo, formatDateToString } from "~/lib/common/helpers";
 import Link from "next/link";
 import { auth } from "~/server/auth";
 import { Button } from "../../../../components/ui/button";
 import { api } from "~/trpc/server";
-import {
-  events as staleEvents,
-  type EventWithCount,
-} from "~/app/_components/event/event-feed/_data";
+import { CalendarIcon } from "~/components/ui/calendarIcon";
 
 export const EventFeedComponent = async () => {
   const dbEvents = await api.event.fetchAlEvents();
   const events = [
-    ...staleEvents,
-    ...dbEvents.map((p) => ({ ...p, participantCount: p.participants.length })),
+    ...dbEvents.map((p) => ({
+      ...p,
+      participantCount: p.participants.length,
+      status:
+        p.date < new Date()
+          ? "ENDED"
+          : p.date > new Date()
+            ? "UPCOMING"
+            : "ACTIVE",
+    })),
   ].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
@@ -34,18 +40,14 @@ export const EventFeedComponent = async () => {
   return (
     <Container py={{ base: "12", md: "24" }}>
       <Stack gap="6">
-         <Stack gap={{ base: "2", md: "3" }} justify={'start'}>
+        <Stack gap={{ base: "2", md: "3" }} justify={"start"}>
           <Heading fontFamily={"Alliance"} size={{ base: "3xl", md: "4xl" }}>
             Events
           </Heading>
           {/* <Text color="fg.muted"></Text> */}
         </Stack>
 
-        <HStack
-        gap={4}
-          
-          justify={"space-between"}
-        >
+        <HStack gap={4} justify={"space-between"}>
           <Heading size={{ base: "lg", md: `xl` }}>
             Welcome {session?.user?.username ?? "User"}!
           </Heading>
@@ -63,86 +65,91 @@ export const EventFeedComponent = async () => {
           </Link>
         </HStack>
 
-        {events.map((event) => (
-          <Link
-            href={event.status != "ENDED" ? `/event/${event.slug}` : "#"}
-            key={event.id}
-          >
-            <Flex
-              _hover={{
-                bg: "bg.subtle",
-                opacity: 0.9,
-                color: "lime.600",
-              }}
-              key={event.id}
-              borderWidth="1px"
-              boxShadow={"md"}
-              borderRadius="l3"
-              borderColor={{
-                base: "fg.subtle",
-                _dark: event.status === "ENDED" ? "gray.700" : "teal.200/20",
-              }}
-              divideX={{base:"none", sm:'1px'}}
-              divideY={{base:"1px", sm:'none'}}
-              flexDirection={{base:'column', sm:'row'}}
-              bg="bg"
-              _disabled={{ bg: "bg.subtle", cursor: "not-allowed" }}
-              aria-disabled={event.status === "ENDED"}
-            >
-              <Stack p="6" flex="1">
-                <HStack>
-                  <Badge variant="surface" alignSelf="flex-start">
-                    {event.status}
-                  </Badge>
-                  <Text
-                    textStyle="sm"
-                    textTransform={"uppercase"}
-                    fontWeight="semibold"
-                    color={"fg.muted"}
-                  >
-                    {event.title}
-                  </Text>
-                </HStack>
-                {/* <Text color="fg.muted" lineClamp={2}>
+        {events.length === 0 && (
+          <Center py="48" flexDir={"column"} gap={4}>
+            <CalendarIcon size={48} />
+            <Text color="fg.muted" textAlign={"center"}>
+              No events found. Create one to get started!
+            </Text>
+          </Center>
+        )}
+
+        {events.length > 0 &&
+          events.map((event) => (
+            <Link href={`/event/${event.slug}`} key={event.id}>
+              <Flex
+                _hover={{
+                  bg: "bg.subtle",
+                  opacity: 0.9,
+                  color: "lime.600",
+                }}
+                key={event.id}
+                borderWidth="1px"
+                boxShadow={"md"}
+                borderRadius="l3"
+                borderColor={{
+                  base: "fg.subtle",
+                  _dark: event.status === "ENDED" ? "gray.700" : "teal.200/20",
+                }}
+                divideX={{ base: "none", sm: "1px" }}
+                divideY={{ base: "1px", sm: "none" }}
+                flexDirection={{ base: "column", sm: "row" }}
+                bg="bg"
+              >
+                <Stack p="6" flex="1">
+                  <HStack>
+                    <Badge variant="surface" alignSelf="flex-start">
+                      {event.status}
+                    </Badge>
+                    <Text
+                      textStyle="sm"
+                      textTransform={"uppercase"}
+                      fontWeight="semibold"
+                      color={"fg.muted"}
+                    >
+                      {event.title}
+                    </Text>
+                  </HStack>
+                  {/* <Text color="fg.muted" lineClamp={2}>
                   {event.description}
                 </Text> */}
 
-                <HStack fontWeight="medium" mt="4">
-                  <Text textStyle="sm" color="fg.muted">
-                    {calculateDaysAgo(event.date)}
-                  </Text>
-                  <Spacer />
+                  <HStack fontWeight="medium" mt="4">
+                    <Text textStyle="sm" color="fg.muted">
+                      {calculateDaysAgo(event.date)}
+                    </Text>
+                    <Spacer />
 
-                  <HStack gap="4">
-                    <HStack gap="1">
-                      <LuUser />
+                    <HStack gap="4">
+                      <HStack gap="1">
+                        <LuUser />
 
-                      <Text textStyle="sm" color="fg.muted">
-                        {`${Number(event.participantCount ?? 0)} participant${Number(event.participantCount) > 1 ? "s" : ""}`}
-                      </Text>
+                        <Text textStyle="sm" color="fg.muted">
+                          {`${Number(event.participantCount ?? 0)} participant${Number(event.participantCount) > 1 ? "s" : ""}`}
+                        </Text>
+                      </HStack>
+                      <Status hideBelow="sm">
+                        {formatDateToString(event.date)}
+                      </Status>
                     </HStack>
-                    <Status hideBelow="sm">
-                      {formatDateToString(event.date)}
-                    </Status>
                   </HStack>
-                </HStack>
-              </Stack>
-              <VStack
-                color={event.status == "ENDED" ? "fg.subtle" : "fg"}
-                px="4"
-                py={{base: '4', sm:'0'}}
-                flexDirection={{base: 'row', sm:'column'}}
-                justify="center"
-                flexShrink="0"
-              >
-                <LuChevronRight />
-                <Text textStyle="sm" fontWeight="semibold">
-                  {"view"}
-                </Text>
-              </VStack>
-            </Flex>
-          </Link>
-        ))}
+                </Stack>
+                <VStack
+                  color={event.status == "ENDED" ? "fg.subtle" : "fg"}
+                  px="4"
+                  py={{ base: "4", sm: "0" }}
+                  flexDirection={{ base: "row", sm: "column" }}
+                  justify="center"
+                  flexShrink="0"
+                >
+                  <LuChevronRight />
+                  <Text textStyle="sm" fontWeight="semibold">
+                    {"view"}
+                  </Text>
+                </VStack>
+              </Flex>
+            </Link>
+          ))}
       </Stack>
     </Container>
   );

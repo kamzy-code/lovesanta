@@ -1,5 +1,4 @@
-import { Box, Container, Stack, Tabs, VStack } from "@chakra-ui/react";
-import { type Activity, type Participant } from "@prisma/client";
+import { Container, Tabs, } from "@chakra-ui/react";
 import { WishlistSection } from "./wishlist-section";
 import { PairSection } from "./pair-section";
 import { MatchHistorySection } from "./match-history-section";

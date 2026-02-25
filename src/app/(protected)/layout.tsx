@@ -8,7 +8,7 @@ export default async function ProtectedLayout({
 }) {
   const session = await auth();
 
-  console.log({ session, from: "[protected layout]" });
+  // console.log({ session, from: "[protected layout]" });
 
 
   if (session && !session.user.username){
