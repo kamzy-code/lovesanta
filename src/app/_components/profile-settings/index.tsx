@@ -6,9 +6,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { LuAtSign, LuUserCog } from "react-icons/lu";
-import { SiGoogle } from "react-icons/si";
 import { AuthCard, ConfigPanel } from "./auth-card";
-import { WishlistCard } from "./profile-wishlist-card";
 import { db } from "~/server/db";
 import { auth } from "~/server/auth";
 import { Avatar } from "~/components/ui/avatar";
@@ -79,15 +77,6 @@ export const ProfileSettingComponent = async () => {
              <ProfilePasscodeCard/>
             </Stack>
           </ConfigPanel>
-{/* 
-          <WishlistCard
-            icon={<SiGoogle />}
-            title="Wishlist"
-            // @ts-expect-error type mismatch
-            placeholder={profile.bio}
-            description="What gifts would you like from Secret Santa "
-          /> */}
-          {/* <AuthCard icon={<SiApple />} title="Apple" description="Connect your Apple account" /> */}
         </Stack>
       </Stack>
     </Container>
