@@ -30,6 +30,29 @@ export const eventRouter = createTRPCRouter({
     }),
 
   //PRIVATE PROCEDURES
+  //get event by id
+  getById: protectedProcedure
+    .input(
+      z.object({
+        eventId: z.string().min(3, "Invalid ID"),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const event = await ctx.db.event.findUnique({
+        where: { id: input.eventId },
+        include: {
+          creator: { select: { firstName: true, username: true, image: true } },
+        },
+      });
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found.",
+        });
+      }
+      return event;
+    }),
+
   // create a new event
   create: protectedProcedure
     .input(
@@ -167,6 +190,49 @@ export const eventRouter = createTRPCRouter({
       });
 
       return result;
+    }),
+
+  // edit an event
+  editEvent: protectedProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        date: z.date().optional(),
+        location: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const event = await ctx.db.event.findUnique({
+        where: { id: input.eventId },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found.",
+        });
+      }
+
+      if (event.creatorId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only edit events you created.",
+        });
+      }
+
+      const updatedEvent = await ctx.db.event.update({
+        where: { id: input.eventId },
+        data: {
+          title: input.title,
+          description: input.description,
+          date: input.date,
+          location: input.location,
+        },
+      });
+
+      return updatedEvent;
     }),
 
   // Fetch all events a user belongs to

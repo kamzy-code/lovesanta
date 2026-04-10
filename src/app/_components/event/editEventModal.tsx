@@ -7,13 +7,13 @@ import {
   createOverlay,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { AddActivityForm } from "./addActivityForm";
+import { EditEventForm } from "./editEventForm";
 
-interface AddActivityModalProps {
+interface EditEventModalProps {
   eventId?: string;
 }
 
-export const AddActivityModal = createOverlay<AddActivityModalProps>(
+export const EditEventModal = createOverlay<EditEventModalProps>(
   (props) => {
     const { eventId, ...rest } = props;
 
@@ -30,13 +30,13 @@ export const AddActivityModal = createOverlay<AddActivityModalProps>(
             <Dialog.Content top={50} mx={12}>
               <Dialog.Header alignItems={"center"} justifyContent={"center"}>
                 <Dialog.Title fontFamily={"Alliance"}>
-                  Add New Activity
+                  Edit Event
                 </Dialog.Title>
               </Dialog.Header>
 
               <Dialog.Body>
                 <Stack>
-                  <AddActivityForm eventId={eventId!} onclose={handleSubmit} />
+                  <EditEventForm eventId={eventId!} onClose={handleSubmit} />
                 </Stack>
               </Dialog.Body>
             </Dialog.Content>

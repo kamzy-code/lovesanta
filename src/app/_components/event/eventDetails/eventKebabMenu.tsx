@@ -1,10 +1,12 @@
 "use client";
-import { Menu, Portal } from "@chakra-ui/react";
+import { AbsoluteCenter, Menu, Portal } from "@chakra-ui/react";
 import { Button } from "~/components/ui/button";
 import { KebabMenu } from "~/components/ui/kebabMenu";
 import { toaster } from "~/components/ui/toaster";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import { EditEventModal } from "../editEventModal";
+import { useColorModeValue } from "~/components/ui/color-mode";
 
 interface EventKebabMenuProps {
   isCreator: boolean;
@@ -15,6 +17,7 @@ export function EventKebabMenu({ isCreator, eventId }: EventKebabMenuProps) {
   const toast = toaster.create;
   const router = useRouter();
   const utils = api.useUtils();
+  const theme = useColorModeValue("light", "dark");
 
   const { mutate: deleteEvent, isPending: isDeleting } =
     api.event.deleteEvent.useMutation({
@@ -60,29 +63,46 @@ export function EventKebabMenu({ isCreator, eventId }: EventKebabMenuProps) {
     leaveEvent({ eventId });
   };
   return (
-    <Menu.Root>
-      <Menu.Trigger asChild>
-        <Button variant="ghost" size="sm">
-          <KebabMenu />
-        </Button>
-      </Menu.Trigger>
-      <Portal>
-        <Menu.Positioner>
-          <Menu.Content>
-            {!isCreator && (
-              <Menu.Item value="leave-event" onClick={() => handleLeave()}>
-                Leave Event
-              </Menu.Item>
-            )}
+    <>
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <Button variant="ghost" size="sm">
+            <KebabMenu />
+          </Button>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {!isCreator && (
+                <Menu.Item value="leave-event" onClick={() => handleLeave()}>
+                  Leave Event
+                </Menu.Item>
+              )}
 
-            {isCreator && (
-              <Menu.Item value="delete-event" onClick={() => handleDelete()}>
-                Delete Event
-              </Menu.Item>
-            )}
-          </Menu.Content>
-        </Menu.Positioner>
-      </Portal>
-    </Menu.Root>
+              {isCreator && (
+                <>
+                  <Menu.Item
+                    value="delete-event"
+                    onClick={() => handleDelete()}
+                  >
+                    Delete Event
+                  </Menu.Item>
+
+                  <Menu.Item
+                    value="edit-event"
+                    onClick={() =>
+                      EditEventModal.open("editEventForm", { eventId })
+                    }
+                  >
+                    Edit Event
+                  </Menu.Item>
+                </>
+              )}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
+      <EditEventModal.Viewport />
+    </>
   );
 }
