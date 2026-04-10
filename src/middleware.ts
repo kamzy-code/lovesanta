@@ -45,6 +45,10 @@ export default auth(async function middleware(request: NextAuthRequest) {
     return Response.redirect(new URL("/auth/login", nextUrl));
   }
 
+  if (nextUrl.pathname === '/'){
+    return Response.redirect(new URL('/home', nextUrl))
+  }
+
   return;
 });
 
