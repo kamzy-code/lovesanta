@@ -3,6 +3,7 @@ import { EventFeedComponent } from "~/app/_components/event/event-feed";
 import { Container } from "@chakra-ui/react";
 import { Suspense } from "react";
 import { PageLoader } from "~/components/ui/pageLoader";
+import { NavbarComponent } from "~/components/navbar/block";
 
 export default async function Home() {
   /**
@@ -23,6 +24,7 @@ export default async function Home() {
       <Container maxW="6xl" pb={24}>
         <Suspense fallback={<PageLoader/>}>
           <EventFeedComponent />
+          <NavbarComponent activeMenuKey={0} />
         </Suspense>
       </Container>
     </HydrateClient>

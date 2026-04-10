@@ -1,18 +1,10 @@
-import {
-  Container,
-  HStack,
-  Icon,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Container, HStack, Icon, Stack, Text } from "@chakra-ui/react";
 import { LuAtSign, LuUserCog } from "react-icons/lu";
 import { AuthCard, ConfigPanel } from "./auth-card";
 import { db } from "~/server/db";
 import { auth } from "~/server/auth";
 import { Avatar } from "~/components/ui/avatar";
 import { ProfilePasscodeCard } from "./profile-passcode-card";
-
-
 
 export const ProfileSettingComponent = async () => {
   const session = await auth();
@@ -22,7 +14,6 @@ export const ProfileSettingComponent = async () => {
       id: session?.user?.id,
     },
   });
-
 
   if (!profile) {
     return <div>You are not logged in</div>;
@@ -58,25 +49,7 @@ export const ProfileSettingComponent = async () => {
             connected
           />
 
-          <ConfigPanel>
-            <Stack gap="4" w="full">
-              <HStack justify={"flex-start"}>
-                <Icon>
-                  <LuUserCog />
-                </Icon>
-                <Text
-                  textAlign={"left"}
-                  fontWeight={"semibold"}
-                  letterSpacing={"1.2px"}
-                  textStyle="md"
-                  color="fg.muted"
-                >
-                  Change your passcode
-                </Text>
-              </HStack>
-             <ProfilePasscodeCard/>
-            </Stack>
-          </ConfigPanel>
+          <ConfigPanel></ConfigPanel>
         </Stack>
       </Stack>
     </Container>

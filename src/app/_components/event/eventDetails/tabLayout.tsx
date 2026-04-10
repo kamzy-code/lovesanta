@@ -29,7 +29,7 @@ export async function EventTabs({
   isCreator,
 }: EventTabProps) {
   const session = await auth();
-  
+
   // Get participant ID for current user if they're enrolled
   let participantId: string | undefined;
   if (session) {
@@ -45,7 +45,7 @@ export async function EventTabs({
   await api.activity.getEventActivities.prefetch({
     eventId,
   });
-  
+
   return (
     <Tabs.Root
       defaultValue="activities"
@@ -83,11 +83,8 @@ export async function EventTabs({
           {session ? (
             <HydrateClient>
               <Box>
-                <AddActivityButton eventId={eventId} />
-                <ActivityList
-                  eventId={eventId}
-                  isCreator={isCreator}
-                />
+                {isCreator && <AddActivityButton eventId={eventId} />}
+                <ActivityList eventId={eventId} isCreator={isCreator} />
               </Box>
             </HydrateClient>
           ) : (
