@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { getUserByEmail } from "~/lib/db/users";
 import { signupSchema } from "~/schemas";
 import { generateVerificationToken } from "~/lib/common/token";
-import { sendVerificationTokenMail } from "~/lib/common/sendMail";
+import { sendVerificationTokenMail, sendWelcomeMail } from "~/lib/common/sendMail";
 
 export interface SignupFormValue {
   firstName: string;
@@ -85,6 +85,7 @@ export async function SignupAction(
 
     const verificationToken = await generateVerificationToken(values.email);
     //Send Email
+    await sendWelcomeMail(values.email);
     await sendVerificationTokenMail(verificationToken.identifier, verificationToken.token)
   } catch (error) {
     return {

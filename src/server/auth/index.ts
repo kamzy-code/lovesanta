@@ -4,6 +4,7 @@ import { authConfig } from "./config";
 import { db } from "../db";
 import Credentials from "next-auth/providers/credentials";
 import { loginSchema } from "~/schemas";
+import { sendWelcomeMail } from "~/lib/common/sendMail";
 import { getUserByEmail, getUserById } from "~/lib/db/users";
 import bcrypt from "bcryptjs";
 
@@ -83,6 +84,12 @@ const {
   adapter: customAdapter,
   session: { strategy: "jwt" },
   events: {
+    async createUser({ user }) {
+      if (user.email) {
+        await sendWelcomeMail(user.email);
+      }
+    },
+    
     /**
      * @note
      * This event is redundant, as the session is already deleted when the user signs out.

@@ -128,7 +128,9 @@ export const sendPasswordResetMail = async (to: string, token: string) => {
     await sendEmail(subject, text, to, html);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to verification email";
+      error instanceof Error
+        ? error.message
+        : "Failed to send verification email";
     throw new Error(message || "Error sending verification email");
   }
 };
@@ -226,6 +228,108 @@ ${resetPasswordURL}
 This link will expire shortly.
 
 If you didn’t request a password reset, you can safely ignore this email.
+
+— Hangnex Team
+`.trim();
+}
+
+// SEND WELCOME EMAIL
+export async function sendWelcomeMail(to: string) {
+  const subject = "Welcome to Hangnex";
+  const html = welcomeEmailHTML();
+  const text = welcomeEmailText();
+
+  try {
+    await sendEmail(subject, text, to, html);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to send welcome email";
+    throw new Error(message || "Error sending welcome email");
+  }
+}
+
+function welcomeEmailHTML() {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <body style="margin:0; padding:0; background-color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:480px; border:1px solid #e5e5e5;">
+            <tr>
+              <td style="padding:32px; color:#000000;">
+
+                <!-- Brand -->
+                <h1 style="margin:0 0 24px 0; font-size:20px; font-weight:600; text-align:center;">
+                  Hangnex
+                </h1>
+
+                <p style="margin:0 0 16px 0; font-size:14px; line-height:1.6;">
+                  Welcome to Hangnex! We’re excited to have you on board.
+                </p>
+
+                <p style="margin:0 0 24px 0; font-size:14px; line-height:1.6;">
+                  You now have full access to create and join events, manage your profile, and connect with others.
+                </p>
+
+                <!-- Button -->
+                <table align="center" cellpadding="0" cellspacing="0" role="presentation" style="margin:32px auto;">
+                  <tr>
+                    <td>
+                      <a
+                        href="${baseURL}"
+                        style="
+                          display:inline-block;
+                          padding:12px 24px;
+                          background-color:#000000;
+                          color:#ffffff;
+                          text-decoration:none;
+                          font-size:14px;
+                          font-weight:500;
+                          border:1px solid #000000;
+                        "
+                      >
+                        Start Creating Events
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <hr style="border:none; border-top:1px solid #e5e5e5; margin:32px 0;" />
+
+                <p style="margin:0; font-size:12px; color:#777777; line-height:1.6;">
+                  If you have any questions, feel free to reach out to our support team.
+                </p>
+
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin-top:16px; font-size:11px; color:#999999;">
+            © ${new Date().getFullYear()} Hangnex
+          </p>
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;
+}
+
+function welcomeEmailText() {
+  return `
+Welcome to Hangnex!
+
+You now have full access to create and join events, manage your profile, and connect with others.
+
+Start Creating Events
+
+${baseURL}
+
+If you have any questions, feel free to reach out to our support team.
 
 — Hangnex Team
 `.trim();
