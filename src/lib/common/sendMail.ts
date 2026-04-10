@@ -2,7 +2,7 @@
 
 import { sendEmail } from "./mailTranspot";
 
-const baseURL = process.env.BASE_URL;
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 // VERIFICATION EMAIL AND HELPERS
 export const sendVerificationTokenMail = async (to: string, token: string) => {
