@@ -12,7 +12,7 @@ export default async function GiftingActivityPage({
 
   return (
     <Suspense fallback={<PageLoader />}>
-      <Container>
+      <Container px={0}>
         <GiftingActivity activityId={id} />
       </Container>
     </Suspense>

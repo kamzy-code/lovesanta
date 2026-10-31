@@ -5,7 +5,7 @@ export const textStyles = defineTextStyles({
   body: {
     description: "The body text style - used in paragraphs",
     value: {
-      fontFamily: "var(--font-geist-sans)",
+      fontFamily: "body",
       fontWeight: "400",
       fontSize: "16px",
       lineHeight: "24",
@@ -17,7 +17,7 @@ export const textStyles = defineTextStyles({
   heading: {
     description: "The heading text style - used in titles",
     value: {
-      fontFamily: "Alliance",
+      fontFamily: "heading",
       fontWeight: "500",
       letterSpacing: "0",
       textDecoration: "None",
@@ -39,6 +39,11 @@ export const systemConfig = createSystem(defaultConfig, {
       "2xl": "134em",
     },
     tokens: {
+      fonts: {
+        // --font-inter is set by next/font in the root layout
+        heading: { value: "var(--font-inter), system-ui, sans-serif" },
+        body: { value: "var(--font-inter), system-ui, sans-serif" },
+      },
       colors: {
         brand: {
           50: { value: "#e6f2ff" },
@@ -66,18 +71,30 @@ export const systemConfig = createSystem(defaultConfig, {
   globalCss: {
     "html, #__next": {
       height: "100%",
-      fontFamily: "Blimone",
+      fontFamily: "body",
       fontSize: "16px",
       fontWeight: "400",
-      letterSpacing: ".3px",
+      letterSpacing: "normal",
     },
     body: {
       overflowY: "scroll", // Always show scrollbar to avoid flickering
-      paddingBottom: "100px",
-      fontFamily: "'Blimone'",
+      // clears the fixed bottom nav / action bar, plus the home indicator
+      paddingBottom: "calc(96px + env(safe-area-inset-bottom))",
+      fontFamily: "body",
+      overscrollBehaviorY: "none",
     },
     html: {
       scrollBehavior: "smooth",
+      textSizeAdjust: "100%",
+    },
+    // native feel: no grey tap flash, no double-tap zoom delay on controls
+    "a, button, [role=button], [role=tab], label, summary": {
+      WebkitTapHighlightColor: "transparent",
+      touchAction: "manipulation",
+    },
+    // 16px+ inputs stop mobile browsers zooming in on focus
+    "input, textarea, select": {
+      fontSize: "max(16px, 1em)",
     },
   },
 });

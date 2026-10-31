@@ -12,8 +12,8 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <NavbarComponent activeMenuKey={1} />
-      <Container pb={16}>{profileSettings}</Container>
+      <NavbarComponent />
+      <Container px={0}>{profileSettings}</Container>
     </HydrateClient>
   );
 }

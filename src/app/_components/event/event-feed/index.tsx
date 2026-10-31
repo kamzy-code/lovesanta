@@ -38,10 +38,10 @@ export const EventFeedComponent = async () => {
 
   const session = await auth();
   return (
-    <Container py={{ base: "12", md: "24" }}>
+    <Container px={0} py={{ base: "8", md: "24" }}>
       <Stack gap="6">
         <Stack gap={{ base: "2", md: "3" }} justify={"start"}>
-          <Heading fontFamily={"Alliance"} size={{ base: "3xl", md: "4xl" }}>
+          <Heading size={{ base: "3xl", md: "4xl" }}>
             Events
           </Heading>
           {/* <Text color="fg.muted"></Text> */}
@@ -54,6 +54,8 @@ export const EventFeedComponent = async () => {
 
           <Link href={"/event/create"}>
             <Button
+              size={{ base: "md", md: "lg" }}
+              flexShrink={0}
               variant={"outline"}
               borderColor={{ base: "fg.subtle", _dark: "gray.700" }}
               _hover={{
@@ -96,7 +98,7 @@ export const EventFeedComponent = async () => {
                 flexDirection={{ base: "column", sm: "row" }}
                 bg="bg"
               >
-                <Stack p="6" flex="1">
+                <Stack p={{ base: "4", sm: "6" }} flex="1" minW={0}>
                   <HStack>
                     <Badge variant="surface" alignSelf="flex-start">
                       {event.status}
@@ -106,6 +108,7 @@ export const EventFeedComponent = async () => {
                       textTransform={"uppercase"}
                       fontWeight="semibold"
                       color={"fg.muted"}
+                      truncate
                     >
                       {event.title}
                     </Text>
@@ -135,6 +138,7 @@ export const EventFeedComponent = async () => {
                   </HStack>
                 </Stack>
                 <VStack
+                  hideBelow="sm"
                   color={event.status == "ENDED" ? "fg.subtle" : "fg"}
                   px="4"
                   py={{ base: "4", sm: "0" }}

@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { type ActivityType } from "@prisma/client";
+import { giftingSettingsSchema } from "~/lib/common/gifting";
 
 export interface AddActivityFormValue {
   activity: string;
@@ -35,11 +36,20 @@ export const addActivityAction = async (
 
   console.log(values);
 
-  if (values.activity === "GIFTING" && !values.budget) {
+  const giftingSettings =
+    values.activity === "GIFTING"
+      ? giftingSettingsSchema.safeParse({
+          budget: values.budget?.replace(/[^\d.]/g, "") || undefined,
+        })
+      : undefined;
+
+  if (giftingSettings && !giftingSettings.success) {
     const response: AddActivityFormState = {
       success: false,
       errors: {
-        budget: "Add a minimum budget for gifts",
+        budget: values.budget
+          ? giftingSettings.error.issues[0]?.message
+          : "Add a minimum budget for gifts",
       },
       values,
     };
@@ -50,13 +60,7 @@ export const addActivityAction = async (
   const activity = {
     eventId: values.eventId,
     type: values.activity as ActivityType,
-    settings: {
-      ...(values.activity === "GIFTING"
-        ? {
-            budget: values.budget,
-          }
-        : {}),
-    },
+    settings: giftingSettings?.data ?? {},
   };
 
     console.log(activity);

@@ -37,6 +37,7 @@ enum ActivityType {
 enum ActivityStatus {
   PENDING
   ACTIVE
+  PAUSED // pairing frozen, joining + wishlists still open
   COMPLETED
 }
 

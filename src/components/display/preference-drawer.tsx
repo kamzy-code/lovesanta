@@ -17,7 +17,7 @@ import { Avatar } from "~/components/ui/avatar";
 import { FiChevronRight } from "react-icons/fi";
 import { type Participant, type User } from "@prisma/client";
 import { api } from "~/trpc/react";
-import { Toaster, toaster } from "../ui/toaster";
+import { toaster } from "../ui/toaster";
 
 type GiftingDrawerConfig = {
   open: boolean;
@@ -27,6 +27,7 @@ type GiftingDrawerConfig = {
   activityId: string;
   receiver?: Participant & { user?: Pick<User, "firstName" | "id" | "image" | "email"> };
   attemptsRemaining: number;
+  onGenerated?: () => Promise<void> | void;
 };
 
 export function PairPreferenceDrawer({
@@ -37,6 +38,7 @@ export function PairPreferenceDrawer({
   activityId,
   receiver,
   attemptsRemaining,
+  onGenerated,
 }: GiftingDrawerConfig) {
 
   const utils = api.useUtils();
@@ -44,12 +46,16 @@ export function PairPreferenceDrawer({
 
   const generateMatchMutation = api.gifting.generateMatch.useMutation({
     onSuccess: async () => {
-      await utils.gifting.getCurrentMatch.invalidate({
-        participantId,
-        eventId,
-        activityId,
-      });
       onOpenChange(false);
+      if (onGenerated) {
+        await onGenerated();
+      } else {
+        await utils.gifting.getCurrentMatch.invalidate({
+          participantId,
+          eventId,
+          activityId,
+        });
+      }
       toast({
         title: "Success",
         description: "New pair generated!",
@@ -79,10 +85,14 @@ export function PairPreferenceDrawer({
       size={"xl"}
     >
       <DrawerBackdrop />
-      <DrawerContent minH={"50vh"} pt={12} borderTopRadius={"3xl"}>
-        <DrawerCloseTrigger />
-
-        <Toaster />
+      <DrawerContent
+        minH={"50dvh"}
+        maxH={"90dvh"}
+        pt={12}
+        pb={"env(safe-area-inset-bottom)"}
+        borderTopRadius={"3xl"}
+        overflowY={"auto"}
+      >
         <Center rotate={"8"} ml={"-24"} py={8} fontFamily={"Pixeboy"}>
           <Avatar
             name={giverName}
@@ -121,7 +131,6 @@ export function PairPreferenceDrawer({
           maxW={"md"}
           mx={"auto"}
           textTransform={"capitalize"}
-          fontFamily={"Blimone"}
         >
           <DrawerTitle fontSize={"lg"}>
             {giverName} & {receiverName}
@@ -144,16 +153,17 @@ export function PairPreferenceDrawer({
             remaining.
           </Text>
 
-          <Stack mt={10}>
+          <Stack mt={10} w={"full"}>
             <Button
               mt={4}
+              w={"full"}
               ring={"1px"}
               disabled={attemptsRemaining === 0}
               aria-disabled={attemptsRemaining === 0}
               ringColor={"bg.subtle"}
               boxShadow={"lg"}
               variant="subtle"
-              size="md"
+              size="lg"
               rounded={"l3"}
               loading={generateMatchMutation.isPending}
               onClick={async () => {

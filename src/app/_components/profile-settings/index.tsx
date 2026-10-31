@@ -1,6 +1,6 @@
 import { Container, HStack, Icon, Stack, Text } from "@chakra-ui/react";
-import { LuAtSign, LuUserCog } from "react-icons/lu";
-import { AuthCard, ConfigPanel } from "./auth-card";
+import { ConfigPanel } from "./auth-card";
+import { SignInMethods } from "./sign-in-methods";
 import { db } from "~/server/db";
 import { auth } from "~/server/auth";
 import { Avatar } from "~/components/ui/avatar";
@@ -20,7 +20,7 @@ export const ProfileSettingComponent = async () => {
   }
 
   return (
-    <Container maxW="xl" py="12">
+    <Container maxW="xl" px={0} py={{ base: "8", md: "12" }}>
       <Stack pb={2}>
         <Avatar
           bg={{
@@ -42,12 +42,7 @@ export const ProfileSettingComponent = async () => {
           </Text>
         </Stack>
         <Stack gap="4">
-          <AuthCard
-            icon={<LuAtSign />}
-            title={profile.email ?? "email"}
-            description="Use email to login"
-            connected
-          />
+          <SignInMethods />
 
           <ConfigPanel></ConfigPanel>
         </Stack>

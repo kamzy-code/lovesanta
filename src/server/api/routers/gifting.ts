@@ -175,6 +175,28 @@ export const giftingRouter = createTRPCRouter({
         });
       }
 
+      const activity = await ctx.db.activity.findUnique({
+        where: { id: input.activityId },
+        select: { status: true, eventId: true },
+      });
+
+      if (!activity || activity.eventId !== input.eventId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Activity not found",
+        });
+      }
+
+      if (activity.status !== "ACTIVE") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            activity.status === "PAUSED"
+              ? "Pairing is paused by the organiser. Check back soon!"
+              : "Pairing isn't open for this activity.",
+        });
+      }
+
       // Check if participant already has a match
       const existingMatch = await ctx.db.match.findFirst({
         where: {

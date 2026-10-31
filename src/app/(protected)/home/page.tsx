@@ -21,10 +21,10 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <Container maxW="6xl" pb={24}>
+      <Container maxW="6xl" px={0}>
         <Suspense fallback={<PageLoader/>}>
           <EventFeedComponent />
-          <NavbarComponent activeMenuKey={0} />
+          <NavbarComponent />
         </Suspense>
       </Container>
     </HydrateClient>

@@ -10,7 +10,8 @@ import {
 } from "@chakra-ui/react"
 
 export const toaster = createToaster({
-  placement: "bottom-end",
+  // top: bottom of the screen is taken by the tab bar / action bar on phones
+  placement: "top",
   pauseOnPageIdle: true,
 })
 

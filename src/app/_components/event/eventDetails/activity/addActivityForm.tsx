@@ -69,14 +69,19 @@ export const AddActivityForm = ({
 
         {activityType === "GIFTING" && (
           <Field
-            label="Budget"
+            label="Minimum gift budget (₦)"
+            helperText="The least amount each person should spend on a gift"
             errorText={newFormState.errors?.budget}
             invalid={!!newFormState.errors?.budget}
           >
             <Input
               type="text"
-              autoComplete="budget"
-              placeholder={"Enter a budget for Gifting"}
+              inputMode="numeric"
+              pattern="[0-9,]*"
+              size="lg"
+              fontSize="md"
+              autoComplete="off"
+              placeholder="e.g. 10,000"
               name="budget"
               defaultValue={newFormState.values?.budget || ""}
             />

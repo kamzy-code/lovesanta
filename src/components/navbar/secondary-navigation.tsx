@@ -1,73 +1,86 @@
 "use client";
-import { HStack, IconButton, Tabs, type TabsRootProps } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Box, HStack, Icon, Text, chakra } from "@chakra-ui/react";
 import type { SecondaryNavItem } from "./data";
-import { ColorModeButton } from "../ui/color-mode";
+import { useColorMode } from "../ui/color-mode";
 
-import { LuLogOut } from "react-icons/lu";
+import { LuLogOut, LuMoon, LuSun } from "react-icons/lu";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { IconType } from "react-icons";
+import type { ReactNode } from "react";
 
-interface Props extends TabsRootProps {
+interface Props {
   items?: SecondaryNavItem[];
-  activeKey: number;
 }
 
-export const SecondaryNavigation = (props: Props) => {
-  const { items = [], activeKey, ...rest } = props;
-  const [activeTab, setActiveTab] = useState(items[activeKey]?.value);
-  useEffect(() => {
-    setActiveTab(items[activeKey]?.value);
-  }, [items, activeKey]);
+const TabItem = ({
+  icon,
+  label,
+  active,
+}: {
+  icon: IconType;
+  label: ReactNode;
+  active?: boolean;
+}) => (
+  <HStack
+    flexDir={{ base: "column", md: "row" }}
+    justify="center"
+    gap={{ base: 0.5, md: 2 }}
+    minW={{ base: 16, md: "auto" }}
+    minH={11}
+    px={{ base: 2, md: 3 }}
+    rounded="lg"
+    color={active ? "fg" : "fg.muted"}
+    bg={{ md: active ? { base: "white", _dark: "bg.subtle" } : undefined }}
+    transition="color 0.15s, background 0.15s"
+  >
+    <Icon as={icon} boxSize={{ base: 6, md: 4 }} />
+    <Text fontSize={{ base: "2xs", md: "sm" }} fontWeight="medium">
+      {label}
+    </Text>
+  </HStack>
+);
+
+const TabButton = chakra("button", {
+  base: { cursor: "pointer", flex: { base: 1, md: "initial" } },
+});
+
+export const SecondaryNavigation = ({ items = [] }: Props) => {
+  const pathname = usePathname();
+  const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <Tabs.Root
-      value={activeTab}
-      onValueChange={(e) => setActiveTab(e.value)}
-      variant="plain"
-      size="md"
-      colorPalette="gray"
-      {...rest}
+    <HStack
+      as="nav"
+      w={{ base: "full", md: "auto" }}
+      justify="space-around"
+      gap={{ base: 0, md: 1 }}
+      p={{ base: 1, md: 1 }}
+      pb={{ base: "calc(4px + env(safe-area-inset-bottom))", md: 1 }}
+      borderTopWidth={{ base: "1px", md: 0 }}
+      borderWidth={{ md: "1px" }}
+      borderRadius={{ base: 0, md: "lg" }}
+      bg={{ base: "bg", md: "bg.muted", _dark: { md: "gray.900" } }}
     >
-      <Tabs.List
-        alignItems="center"
-        borderWidth="1px"
-        p="1"
-        h="10"
-        borderRadius="lg"
-        bg={{ base: "bg.muted", _dark: "gray.900" }}
-      >
-        {items.map(({ value, path, label }) => (
-          <Tabs.Trigger key={value} value={value} h="8">
-            <Link href={path} passHref>
-              {label}
-            </Link>
-          </Tabs.Trigger>
-        ))}
-        <Tabs.Indicator
-          borderRadius="l2"
-          bg={{ base: "white", _dark: "bg.subtle" }}
+      {items.map(({ value, path, label, icon }) => (
+        <Box asChild key={value} flex={{ base: 1, md: "initial" }}>
+          <Link href={path} aria-current={pathname === path ? "page" : undefined}>
+            <TabItem icon={icon} label={label} active={pathname === path} />
+          </Link>
+        </Box>
+      ))}
+
+      <TabButton type="button" onClick={toggleColorMode} aria-label="Toggle theme">
+        <TabItem
+          icon={colorMode === "dark" ? LuSun : LuMoon}
+          label={colorMode === "dark" ? "Light" : "Dark"}
         />
+      </TabButton>
 
-        <HStack ml={"3"} mr="0" spaceX={-2}>
-          <IconButton
-            size={"xs"}
-            css={{
-              _icon: {
-                width: "5",
-                height: "5",
-              },
-            }}
-            aria-label="Logout"
-            variant="ghost"
-            onClick={() => signOut()}
-          >
-            <LuLogOut />
-          </IconButton>
-
-          <ColorModeButton />
-        </HStack>
-      </Tabs.List>
-    </Tabs.Root>
+      <TabButton type="button" onClick={() => void signOut()} aria-label="Logout">
+        <TabItem icon={LuLogOut} label="Logout" />
+      </TabButton>
+    </HStack>
   );
 };

@@ -3,7 +3,69 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { unstable_cache } from "next/cache";
-import { ActivityType } from "@prisma/client";
+import {
+  ActivityType,
+  type ActivityStatus,
+  type PrismaClient,
+} from "@prisma/client";
+import { giftingSettingsSchema } from "~/lib/common/gifting";
+
+/**
+ * @function getActivityAsCreator
+ * Loads an activity and verifies the current user created its event
+ */
+async function getActivityAsCreator(
+  db: PrismaClient,
+  activityId: string,
+  userId: string,
+) {
+  const activity = await db.activity.findUnique({
+    where: { id: activityId },
+    include: { event: true },
+  });
+
+  if (!activity) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Activity not found",
+    });
+  }
+
+  if (activity.event.creatorId !== userId) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You don't have permission to complete this action.",
+    });
+  }
+
+  return activity;
+}
+
+/**
+ * @function setActivityStatus
+ * Moves an activity between statuses, only from the allowed `from` states
+ */
+async function setActivityStatus(
+  db: PrismaClient,
+  activityId: string,
+  userId: string,
+  from: ActivityStatus[],
+  to: ActivityStatus,
+) {
+  const activity = await getActivityAsCreator(db, activityId, userId);
+
+  if (!from.includes(activity.status)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Activity is ${activity.status.toLowerCase()}, so it can't be moved to ${to.toLowerCase()}.`,
+    });
+  }
+
+  return db.activity.update({
+    where: { id: activityId },
+    data: { status: to },
+  });
+}
 
 export const activityRouter = createTRPCRouter({
   //PUBLIC PROCEDURES
@@ -57,9 +119,17 @@ export const activityRouter = createTRPCRouter({
         },
       });
 
+      const matchedCount = await ctx.db.match.count({
+        where: { activityId: activity.id },
+      });
+
       return {
         ...activity,
         currentUserParticipantId: currentUserParticipant?.id || null,
+        unmatchedCount: Math.max(
+          0,
+          activity.event.participants.length - matchedCount,
+        ),
       };
     }),
 
@@ -86,7 +156,47 @@ export const activityRouter = createTRPCRouter({
         });
       }
 
+      if (input.type === "GIFTING") {
+        const settings = giftingSettingsSchema.safeParse(input.settings);
+        if (!settings.success) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: settings.error.issues[0]?.message ?? "Invalid budget",
+            cause: settings.error,
+          });
+        }
+        return await ctx.db.activity.create({
+          data: { ...input, settings: settings.data },
+        });
+      }
+
       return await ctx.db.activity.create({ data: input });
+    }),
+
+  // update the gifting budget
+  updateGiftingSettings: protectedProcedure
+    .input(
+      z.object({
+        activityId: z.string(),
+        settings: giftingSettingsSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const activity = await getActivityAsCreator(
+        ctx.db,
+        input.activityId,
+        ctx.session.user.id,
+      );
+
+      const current =
+        activity.settings && typeof activity.settings === "object"
+          ? (activity.settings as Record<string, unknown>)
+          : {};
+
+      return await ctx.db.activity.update({
+        where: { id: input.activityId },
+        data: { settings: { ...current, ...input.settings } },
+      });
     }),
 
   // start an activity
@@ -141,6 +251,32 @@ export const activityRouter = createTRPCRouter({
         where: { id: input.activityId },
         data: { status: "ACTIVE" },
       });
+    }),
+
+  // pause pairing; people can still join and edit wishlists
+  pauseActivity: protectedProcedure
+    .input(z.object({ activityId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return setActivityStatus(
+        ctx.db,
+        input.activityId,
+        ctx.session.user.id,
+        ["ACTIVE"],
+        "PAUSED",
+      );
+    }),
+
+  // resume a paused activity
+  resumeActivity: protectedProcedure
+    .input(z.object({ activityId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return setActivityStatus(
+        ctx.db,
+        input.activityId,
+        ctx.session.user.id,
+        ["PAUSED"],
+        "ACTIVE",
+      );
     }),
 
   // end activity

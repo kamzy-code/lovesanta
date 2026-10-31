@@ -7,11 +7,13 @@ import {
   Heading,
   Textarea,
   Button,
-  HStack,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { toaster, Toaster } from "~/components/ui/toaster";
+import { toaster } from "~/components/ui/toaster";
+import { formatGiftBudget } from "~/lib/common/gifting";
+import { useGiftingActivity } from "./gifting-header";
 import { useForm } from "react-hook-form";
 import { api } from "~/trpc/react";
 import { LuCheck, LuLoader } from "react-icons/lu";
@@ -19,6 +21,7 @@ import { LuCheck, LuLoader } from "react-icons/lu";
 interface WishlistSectionProps {
   eventId: string;
   participantId: string;
+  activityId: string;
 }
 
 interface WishlistFormValues {
@@ -28,8 +31,11 @@ interface WishlistFormValues {
 export function WishlistSection({
   eventId,
   participantId,
+  activityId,
 }: WishlistSectionProps) {
   const toast = toaster.create;
+  const { data: activity } = useGiftingActivity(activityId);
+  const budget = formatGiftBudget(activity?.settings);
   const utils = api.useUtils();
 
   // Fetch current wishlist
@@ -91,7 +97,6 @@ export function WishlistSection({
         </Card.Description>
       </Card.Header>
       <Card.Body>
-        <Toaster />
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <VStack gap={4} align="stretch">
             <Box>
@@ -99,16 +104,23 @@ export function WishlistSection({
                 resize={"none"}
                 placeholder="I want the new iPhone 16, a cozy sweater, the latest sci-fi book series..."
                 minH="150px"
+                rounded="xl"
                 {...register("wishlist")}
               />
               <Text fontSize="xs" color="fg.muted" mt={2}>
-                Updated wishlists help your Secret Santa choose the perfect
-                gift!
+                {budget
+                  ? `Gifts are at least ${budget}. Add a few ideas around that amount.`
+                  : "Updated wishlists help your Secret Santa choose the perfect gift!"}
               </Text>
             </Box>
 
-            <HStack justify="flex-end" gap={3}>
+            <Stack
+              direction={{ base: "column-reverse", sm: "row" }}
+              justify="flex-end"
+              gap={3}
+            >
               <Button
+                size="lg"
                 variant="outline"
                 onClick={() => reset()}
                 disabled={isPending}
@@ -116,6 +128,7 @@ export function WishlistSection({
                 Cancel
               </Button>
               <Button
+                size="lg"
                 type="submit"
                 disabled={isPending}
                 loadingText="Saving..."
@@ -132,7 +145,7 @@ export function WishlistSection({
                   </>
                 )}
               </Button>
-            </HStack>
+            </Stack>
           </VStack>
         </form>
       </Card.Body>

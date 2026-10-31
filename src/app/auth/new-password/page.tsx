@@ -12,7 +12,7 @@ export default async function NewPasswordPage({
     <Container maxW="sm" py={{ base: "12", md: "24" }}>
       <Stack gap="8">
         <Stack gap={{ base: "2", md: "3" }} textAlign="center">
-          <Heading fontFamily={"Alliance"} size={{ base: "3xl", md: "4xl" }}>
+          <Heading size={{ base: "3xl", md: "4xl" }}>
             Reset Password
           </Heading>
           <Text color={"fg.muted"}>Reset your password</Text>

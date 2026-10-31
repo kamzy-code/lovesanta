@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  Dialog,
-  Portal,
-  Stack,
-  createOverlay,
-} from "@chakra-ui/react";
-import { useState } from "react";
+import { createOverlay } from "@chakra-ui/react";
+import { Sheet } from "~/components/ui/sheet";
 import { EditEventForm } from "./editEventForm";
 
 interface EditEventModalProps {
@@ -23,26 +18,9 @@ export const EditEventModal = createOverlay<EditEventModalProps>(
     };
 
     return (
-      <Dialog.Root {...rest}>
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content top={50} mx={12}>
-              <Dialog.Header alignItems={"center"} justifyContent={"center"}>
-                <Dialog.Title fontFamily={"Alliance"}>
-                  Edit Event
-                </Dialog.Title>
-              </Dialog.Header>
-
-              <Dialog.Body>
-                <Stack>
-                  <EditEventForm eventId={eventId!} onClose={handleSubmit} />
-                </Stack>
-              </Dialog.Body>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+      <Sheet {...rest} title="Edit Event">
+        <EditEventForm eventId={eventId!} onClose={handleSubmit} />
+      </Sheet>
     );
   },
 );

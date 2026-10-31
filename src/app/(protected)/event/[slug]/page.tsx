@@ -11,7 +11,7 @@ export default async function EventDetails({
   const { slug } = await params;
   return (
     <Suspense fallback={<PageLoader/>}>
-      <Container maxW="6xl">
+      <Container maxW="6xl" px={0}>
         <EventDetailsComponent slug={slug} />
       </Container>
     </Suspense>

@@ -7,6 +7,7 @@ import { generateVerificationToken } from "~/lib/common/token";
 import { getUserByEmail } from "~/lib/db/users";
 import { loginSchema } from "~/schemas";
 import { signIn } from "~/server/auth/index";
+import { db } from "~/server/db";
 
 interface LoginFormValues {
   email: string;
@@ -64,8 +65,29 @@ export async function LoginAction(
 
   const existingUser = await getUserByEmail(email);
 
-  if (!existingUser?.email || !existingUser.password) {
-    errors.submitError = "Email does not exist.";
+  if (!existingUser?.email) {
+    errors.submitError =
+      "No account found with this email. Check the spelling or sign up.";
+    const response: LoginFormState = {
+      success: false,
+      errors,
+      values,
+    };
+    return response;
+  }
+
+  // The account exists but was created through an OAuth provider (e.g. Google)
+  if (!existingUser.password) {
+    const accounts = await db.account.findMany({
+      where: { userId: existingUser.id },
+      select: { provider: true },
+    });
+    const providers = accounts.map(
+      ({ provider }) => provider.charAt(0).toUpperCase() + provider.slice(1),
+    );
+    const via = providers.length > 0 ? providers.join(" or ") : "Google";
+
+    errors.submitError = `This account uses ${via} sign-in and has no password yet. Continue with ${via}, then add a password from Profile settings. You can also use "Forgot password" to set one by email.`;
     const response: LoginFormState = {
       success: false,
       errors,

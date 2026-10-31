@@ -1,6 +1,5 @@
 "use client";
-import { AbsoluteCenter, Menu, Portal } from "@chakra-ui/react";
-import { Button } from "~/components/ui/button";
+import { IconButton, Menu, Portal } from "@chakra-ui/react";
 import { KebabMenu } from "~/components/ui/kebabMenu";
 import { toaster } from "~/components/ui/toaster";
 import { api } from "~/trpc/react";
@@ -64,17 +63,22 @@ export function EventKebabMenu({ isCreator, eventId }: EventKebabMenuProps) {
   };
   return (
     <>
-      <Menu.Root>
+      <Menu.Root positioning={{ placement: "bottom-end" }}>
         <Menu.Trigger asChild>
-          <Button variant="ghost" size="sm">
+          <IconButton
+            aria-label="Event options"
+            variant="ghost"
+            size="lg"
+            rounded="full"
+          >
             <KebabMenu />
-          </Button>
+          </IconButton>
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
               {!isCreator && (
-                <Menu.Item value="leave-event" onClick={() => handleLeave()}>
+                <Menu.Item py={3} value="leave-event" onClick={() => handleLeave()}>
                   Leave Event
                 </Menu.Item>
               )}
@@ -82,6 +86,8 @@ export function EventKebabMenu({ isCreator, eventId }: EventKebabMenuProps) {
               {isCreator && (
                 <>
                   <Menu.Item
+                    py={3}
+                    color="fg.error"
                     value="delete-event"
                     onClick={() => handleDelete()}
                   >
@@ -89,6 +95,7 @@ export function EventKebabMenu({ isCreator, eventId }: EventKebabMenuProps) {
                   </Menu.Item>
 
                   <Menu.Item
+                    py={3}
                     value="edit-event"
                     onClick={() =>
                       EditEventModal.open("editEventForm", { eventId })

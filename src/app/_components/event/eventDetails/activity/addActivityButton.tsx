@@ -1,26 +1,27 @@
 "use client";
-import { FaPlus } from "react-icons/fa6";
+import { LuPlus } from "react-icons/lu";
 import { Button } from "~/components/ui/button";
 import { AddActivityModal } from "./addActivityModal";
-import { Box } from "@chakra-ui/react";
 
 export const AddActivityButton = ({ eventId }: { eventId: string }) => {
   return (
-    <Box>
+    <>
       <Button
-        rounded={"lg"}
-        p={4}
-        position={"absolute"}
-        bottom={{ base: "8", md: "8" }}
-        right={"4"}
+        w="full"
+        size="lg"
+        variant="outline"
+        borderStyle="dashed"
+        rounded="xl"
+        mb={3}
         onClick={async () => {
           await AddActivityModal.open("addActivityForm", { eventId: eventId });
         }}
       >
-        <FaPlus />
+        <LuPlus />
+        Add activity
       </Button>
 
       <AddActivityModal.Viewport />
-    </Box>
+    </>
   );
 };

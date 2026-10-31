@@ -1,6 +1,7 @@
 "use client";
-import { Box, Center, Container } from "@chakra-ui/react";
+import { Box, Center, Skeleton, Stack } from "@chakra-ui/react";
 import { ActivityCard } from "./activityCard";
+import { EditBudgetModal } from "./editBudgetModal";
 import { api } from "~/trpc/react";
 
 interface ActivityListProps {
@@ -19,21 +20,29 @@ export function ActivityList({ eventId, isCreator }: ActivityListProps) {
   }
 
   if (isPending) {
-    return <Center pt={12}>...Loading</Center>;
+    return (
+      <Stack gap={3}>
+        <Skeleton h={20} rounded="xl" />
+        <Skeleton h={20} rounded="xl" />
+      </Stack>
+    );
   }
   return (
-    <Container>
-      {activities.length === 0 && !isPending ? (
-        <Center pt={12}>This event has no activities</Center>
+    <Box>
+      {activities.length === 0 ? (
+        <Center pt={12} color="fg.muted">
+          This event has no activities
+        </Center>
       ) : (
-        activities.map((activity) => {
-          return (
-            <Box key={activity.id}>
-              <ActivityCard activity={activity} isCreator={isCreator} />
-            </Box>
-          );
-        })
+        activities.map((activity) => (
+          <ActivityCard
+            key={activity.id}
+            activity={activity}
+            isCreator={isCreator}
+          />
+        ))
       )}
-    </Container>
+      {isCreator && <EditBudgetModal.Viewport />}
+    </Box>
   );
 }

@@ -89,3 +89,20 @@ export const newPasswordSchema = z
       });
     }
   });
+
+export const setPasswordSchema = z
+  .object({
+    // only required when the account already has a password
+    currentPassword: z.string().optional(),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+      });
+    }
+  });

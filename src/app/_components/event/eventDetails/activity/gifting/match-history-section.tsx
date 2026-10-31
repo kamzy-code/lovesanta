@@ -73,27 +73,30 @@ export function MatchHistorySection({
               key={match.id}
               p={4}
               bg="bg.panel"
-              rounded="lg"
+              rounded="xl"
               borderLeftWidth={4}
               borderColor={index === 0 ? "orange.500" : "gray.500"}
             >
               <HStack gap={3} justify="space-between">
-                <HStack gap={3} flex={1}>
+                <HStack gap={3} flex={1} minW={0}>
                   <Avatar
                     name={match.receiver?.firstName as string}
                     src={match.receiver?.image as string}
                     size="md"
                   />
-                  <VStack align="flex-start" gap={0}>
-                    <Text fontWeight="bold">
+                  <VStack align="flex-start" gap={0} minW={0}>
+                    <Text fontWeight="bold" truncate maxW="full">
                       {match.receiver?.firstName || "Unknown"}
                     </Text>
-                    <Text fontSize="sm" color="fg.muted">
+                    <Text fontSize="sm" color="fg.muted" truncate maxW="full">
                       {match.receiver?.email}
                     </Text>
                   </VStack>
                 </HStack>
-                <Badge colorScheme={index === 0 ? "orange" : "gray"}>
+                <Badge
+                  flexShrink={0}
+                  colorPalette={index === 0 ? "orange" : "gray"}
+                >
                   Attempt {index + 1}
                 </Badge>
               </HStack>

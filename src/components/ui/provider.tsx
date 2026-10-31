@@ -5,6 +5,7 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { ColorModeProvider, type ColorModeProviderProps } from "./color-mode";
 import { systemConfig } from "./system-config";
 import { RootStyles } from "./root-styles";
+import { Toaster } from "./toaster";
 
 export function Provider(props: ColorModeProviderProps) {
   return (
@@ -17,6 +18,7 @@ export function Provider(props: ColorModeProviderProps) {
         shallowRouting
       />
       <ColorModeProvider {...props} />
+      <Toaster />
     </ChakraProvider>
   );
 }

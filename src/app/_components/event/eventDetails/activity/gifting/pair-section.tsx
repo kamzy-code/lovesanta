@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  Alert,
   Box,
   Card,
   Stack,
@@ -12,39 +13,72 @@ import {
   Heading,
   Span,
   Center,
+  Skeleton,
 } from "@chakra-ui/react";
 import { toaster } from "~/components/ui/toaster";
 import { api } from "~/trpc/react";
-import { LuRefreshCw, LuLoader, LuGift, LuCircleAlert } from "react-icons/lu";
+import {
+  LuRefreshCw,
+  LuGift,
+  LuCircleAlert,
+  LuPause,
+  LuWallet,
+} from "react-icons/lu";
 import { Avatar } from "~/components/ui/avatar";
 import { RetryIndicator } from "~/components/display/retry-indicator";
 import { PairPreferenceDrawer } from "~/components/display/preference-drawer";
 import { ConfettiComponent } from "~/components/display/confetti";
-import { ActivityControls } from "./activityControls";
+import { ActionBar } from "~/components/ui/action-bar";
+import { formatGiftBudget } from "~/lib/common/gifting";
+import { useGiftingActivity } from "./gifting-header";
 
 interface PairSectionProps {
   eventId: string;
   participantId: string;
   activityId: string;
-  isCreator: boolean;
 }
+
+const RULES = [
+  "You can only generate a new pair thrice (3 times)",
+  "If you don't like your match, generate a new one",
+  "Viewing your match might cost you a count",
+];
+
+const StatusCard = ({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <Card.Root>
+    <Card.Body>
+      <VStack gap={3} align="center" py={8} textAlign="center">
+        <Box as={icon} fontSize="2xl" color="fg.muted" />
+        <Heading size="md">{title}</Heading>
+        <Text color="fg.muted" maxW="sm">
+          {children}
+        </Text>
+      </VStack>
+    </Card.Body>
+  </Card.Root>
+);
 
 export function PairSection({
   eventId,
   participantId,
   activityId,
-  isCreator,
 }: PairSectionProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [celebrations, setCelebrations] = useState(0);
   const toast = toaster.create;
   const utils = api.useUtils();
 
-  // Fetch activity status to ensure it updates when changed
-  const { data: activityData } = api.activity.getActivityById.useQuery({
-    activityId,
-  });
-
+  const { data: activityData } = useGiftingActivity(activityId);
   const activityStatus = activityData?.status ?? "PENDING";
+  const budget = formatGiftBudget(activityData?.settings);
 
   // Fetch current match and history
   const { data: matchData, isLoading } = api.gifting.getCurrentMatch.useQuery({
@@ -53,15 +87,21 @@ export function PairSection({
     eventId,
   });
 
+  const onGenerated = async () => {
+    setCelebrations((n) => n + 1);
+    await Promise.all([
+      utils.gifting.getCurrentMatch.invalidate({
+        participantId,
+        activityId,
+        eventId,
+      }),
+      utils.gifting.getMatchHistory.invalidate({ participantId, eventId }),
+    ]);
+  };
+
   const { mutate: generatePair, isPending: isGenerating } =
     api.gifting.generateMatch.useMutation({
-      onSuccess: async () => {
-        await utils.gifting.getCurrentMatch.invalidate({
-          participantId,
-          activityId,
-          eventId,
-        });
-      },
+      onSuccess: onGenerated,
       onError: (error) => {
         toast({
           title: "Error",
@@ -86,79 +126,76 @@ export function PairSection({
   };
 
   const isActivityActive = activityStatus === "ACTIVE";
+  const isPaused = activityStatus === "PAUSED";
   const hasMatch = matchData?.match;
   const attemptsRemaining = matchData?.attemptsRemaining ?? 3;
 
   if (isLoading) {
     return (
-      <Card.Root>
-        <Card.Body>
-          <HStack justify="center" py={12}>
-            <LuLoader className="animate-spin" />
-            <Text>Loading your pair information...</Text>
-          </HStack>
-        </Card.Body>
-      </Card.Root>
-    );
-  }
-
-  if (!isActivityActive && !hasMatch) {
-    return (
-      <Card.Root>
-        <Card.Body>
-          <VStack gap={4} align="center" py={8}>
-            <Box as={LuCircleAlert} fontSize="2xl" />
-            <Heading size="md">Activity Not Started</Heading>
-            <Text color="fg.muted" textAlign="center">
-              The gifting activity hasn&apos;t started yet. Please wait for the
-              event organizer to begin the activity.
-            </Text>
-            {isCreator && (
-              <ActivityControls
-                activityId={activityId}
-                activityStatus={activityStatus}
-              />
-            )}
-          </VStack>
-        </Card.Body>
-      </Card.Root>
+      <Stack gap={4}>
+        <Skeleton h={24} rounded="xl" />
+        <Skeleton h={40} rounded="xl" />
+      </Stack>
     );
   }
 
   if (!hasMatch) {
+    if (isPaused) {
+      return (
+        <StatusCard icon={LuPause} title="Pairing is paused">
+          The organiser has paused pairing while more people join. You can
+          still update your wishlist and generate your pair once it resumes.
+        </StatusCard>
+      );
+    }
+
+    if (activityStatus === "COMPLETED") {
+      return (
+        <StatusCard icon={LuCircleAlert} title="Activity has ended">
+          Pairing is closed for this activity.
+        </StatusCard>
+      );
+    }
+
+    if (!isActivityActive) {
+      return (
+        <StatusCard icon={LuCircleAlert} title="Activity Not Started">
+          The gifting activity hasn&apos;t started yet. Please wait for the
+          event organizer to begin the activity.
+        </StatusCard>
+      );
+    }
+
     return (
       <Card.Root>
         <Card.Body>
-            {isCreator && (
-            <ActivityControls
-              activityId={activityId}
-              activityStatus={activityStatus}
-            />
-          )}
-
-          <VStack gap={16} align="stretch" py={12}>
-            <VStack gap={3} align="center">
+          <VStack gap={12} align="stretch" py={8}>
+            <VStack gap={3} align="center" textAlign="center">
               <Box as={LuGift} fontSize="2xl" />
               <Heading size="md">No Pair Yet</Heading>
-              <Text color="fg.muted" textAlign="center">
+              <Text color="fg.muted">
                 Generate your pair to see who you&apos;ll be buying a gift for!
               </Text>
             </VStack>
 
             <Center>
-              <Box animation={"pulse 6s infinite"}>
+              <Box
+                animation="pulse 6s infinite"
+                _motionReduce={{ animation: "none" }}
+              >
                 <Button
-                  w="100px"
-                  h="100px"
+                  w="120px"
+                  h="120px"
                   loading={isGenerating}
                   borderRadius="full"
-                  data-state="open"
                   bg="green.700"
-                  boxShadow="0 0 100px #008f0050, 0 0 20px #008f0010, 0 0 30px #20802040, 0 0 40px #008f00, 0 0 50px #208020, 0 0 60px #008f00, 0 0 70px #208020"
+                  boxShadow="0 0 24px #008f0080, 0 0 60px #20802060"
                   color="white"
+                  fontWeight="bold"
                   _hover={{ bg: "green.600" }}
+                  _active={{ transform: "scale(0.96)" }}
                   onClick={() => {
-                    void generatePair({
+                    generatePair({
                       participantId,
                       activityId,
                       eventId,
@@ -180,42 +217,47 @@ export function PairSection({
 
   return (
     <Stack gap={4}>
-      {/* Activity Controls - Creator Only */}
-      {isCreator && (
-        <ActivityControls
-          activityId={activityId}
-          activityStatus={activityStatus}
-        />
+      <ConfettiComponent key={celebrations} show={celebrations > 0} />
+
+      {isPaused && (
+        <Alert.Root status="warning" rounded="xl">
+          <Alert.Indicator />
+          <Alert.Title>
+            Pairing is paused. You can&apos;t change your pair right now.
+          </Alert.Title>
+        </Alert.Root>
       )}
 
-      {/* Match Card */}
-
-      <ConfettiComponent show={true} />
-      <Card.Root bg="bg.muted" variant="elevated" boxShadow="lg">
+      <Card.Root bg="bg.muted" variant="elevated" boxShadow="lg" rounded="2xl">
         <Card.Header pb={0}>
           <Card.Title>Your Secret Match</Card.Title>
         </Card.Header>
         <Card.Body>
-          <VStack gap={6} align="stretch">
+          <VStack gap={5} align="stretch">
             {/* Receiver Info */}
-            <HStack gap={4} p={4} bg="bg.panel" rounded="lg">
+            <HStack gap={4} p={4} bg="bg.panel" rounded="xl">
               <Avatar
                 name={receiver?.user?.firstName as string}
                 src={receiver?.user?.image as string}
                 size="lg"
               />
-              <VStack align="flex-start" gap={1} flex={1}>
-                <Heading size="md">
-                  {receiver?.user?.username || "Secret Person"}
-                </Heading>
-                {/* <Badge colorScheme="green" variant="subtle">
-                  {"Unknown Region"}
-                </Badge> */}
-                {/* <Text fontSize="sm" color="fg.muted">
-                  {receiver?.user?.email}
-                </Text> */}
-              </VStack>
+              <Heading size="md" flex={1} minW={0} truncate>
+                {receiver?.user?.username || "Secret Person"}
+              </Heading>
             </HStack>
+
+            {budget && (
+              <HStack gap={2} color="fg.muted" fontSize="sm">
+                <LuWallet />
+                <Text>
+                  Spend at least{" "}
+                  <Span fontWeight="bold" color="fg">
+                    {budget}
+                  </Span>{" "}
+                  on their gift
+                </Text>
+              </HStack>
+            )}
 
             {/* Wishlist */}
             <Box>
@@ -225,11 +267,11 @@ export function PairSection({
               <Box
                 p={4}
                 bg="bg.panel"
-                rounded="lg"
+                rounded="xl"
                 borderLeftWidth={4}
                 borderColor="green.500"
               >
-                <Text fontSize="md" lineHeight="tall" whiteSpace="pre-wrap">
+                <Text lineHeight="tall" whiteSpace="pre-wrap">
                   {receiver?.wishlist || "No wishlist provided yet"}
                 </Text>
               </Box>
@@ -239,88 +281,45 @@ export function PairSection({
             <RetryIndicator count={3 - attemptsRemaining} />
 
             {/*Rules */}
-            <VStack
-              divideY={"1px"}
-              gap="2"
-              align={"flex-start"}
-              textAlign="left"
-              fontSize={"lg"}
-            >
-              <HStack
-                fontWeight="medium"
-                w={"full"}
-                bg="bg.muted"
-                gap="0"
-                rounded="lg"
-                px="3"
-                py="1"
-                spaceX={3}
-                align={"flex-start"}
-              >
-                <Span color="fg.muted">1/</Span>
-                <Span>You can only generate a new pair thrice (3 times)</Span>
-              </HStack>
-              <HStack
-                fontWeight="medium"
-                w={"full"}
-                bg="bg.muted"
-                gap="0"
-                rounded="lg"
-                px="3"
-                py="1"
-                spaceX={3}
-                align={"flex-start"}
-              >
-                <Span color="fg.muted">2/</Span>
-                <Span>
-                  If you don&apos;t like your match, generate a new one
-                </Span>
-              </HStack>
-              <HStack
-                fontWeight="medium"
-                bg="bg.muted"
-                gap="0"
-                rounded="lg"
-                px="3"
-                py="1"
-                spaceX={3}
-                align={"flex-start"}
-              >
-                <Span color="fg.muted">3/</Span>
-                <Span>Viewing your match might cost you a count</Span>
-              </HStack>
+            <VStack gap="2" align="stretch" fontSize="sm">
+              {RULES.map((rule, index) => (
+                <HStack
+                  key={rule}
+                  bg="bg.panel"
+                  rounded="lg"
+                  px="3"
+                  py="2"
+                  gap={3}
+                  align="flex-start"
+                >
+                  <Span color="fg.muted">{index + 1}/</Span>
+                  <Span>{rule}</Span>
+                </HStack>
+              ))}
             </VStack>
           </VStack>
         </Card.Body>
       </Card.Root>
 
-      {/* Action Buttons */}
       {isActivityActive && (
-        <HStack gap={3} justify="space-between">
+        <ActionBar>
           <Button
-            flex={1}
+            size="lg"
             variant="outline"
             onClick={handleOpenDrawer}
             disabled={attemptsRemaining === 0}
+            loading={isGenerating}
+            loadingText="Generating..."
           >
-            {isGenerating ? (
-              <>
-                <LuLoader className="animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <LuRefreshCw />
-                {attemptsRemaining > 0
-                  ? `Dont' like this pair? Generate a new pair (${attemptsRemaining} left)`
-                  : "No Attempts Left"}
-              </>
-            )}
+            <LuRefreshCw />
+            {attemptsRemaining > 0
+              ? `New pair (${attemptsRemaining} left)`
+              : "No attempts left"}
           </Button>
-        </HStack>
+        </ActionBar>
       )}
 
-      {!isActivityActive && (
+      {activityStatus === "COMPLETED" && (
         <Text color="fg.muted" textAlign="center" fontStyle="italic">
           The activity is no longer active. Please wait for the organizer to
           restart the activity to change your pair.
@@ -336,6 +335,7 @@ export function PairSection({
         activityId={activityId}
         receiver={matchData?.match?.receiver}
         attemptsRemaining={attemptsRemaining}
+        onGenerated={onGenerated}
       />
     </Stack>
   );

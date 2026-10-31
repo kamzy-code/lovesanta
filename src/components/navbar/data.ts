@@ -1,9 +1,12 @@
 import {
   LuBookmark,
   LuClock,
+  LuHouse,
   LuLayoutDashboard,
   LuSettings,
+  LuUser,
 } from "react-icons/lu";
+import { type IconType } from "react-icons";
 import { routes } from "~/lib/common/routes";
 
 export const items = [
@@ -52,11 +55,15 @@ export const items = [
 export const staticSecondaryNavItems: SecondaryNavItem[] = [
   {
     value: "overview",
-    label: "Overview",
+    label: "Home",
     path: routes.home,
+    icon: LuHouse,
   },
-  { value: "profile", label: "Profile", path: routes.profile },
+  { value: "profile", label: "Profile", path: routes.profile, icon: LuUser },
 ];
 
 export type NavItem = (typeof items)[number];
-export type SecondaryNavItem = NavItem["secondary"][number] & { path: string };
+export type SecondaryNavItem = NavItem["secondary"][number] & {
+  path: string;
+  icon: IconType;
+};

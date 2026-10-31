@@ -140,6 +140,18 @@ export const eventRouter = createTRPCRouter({
   joinEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Ended gifting closes the event to newcomers; paused still lets people in
+      const endedActivity = await ctx.db.activity.findFirst({
+        where: { eventId: input.eventId, type: "GIFTING", status: "COMPLETED" },
+      });
+
+      if (endedActivity) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This event has ended and is no longer accepting participants.",
+        });
+      }
+
       try {
         const participant = await ctx.db.participant.create({
           data: {
