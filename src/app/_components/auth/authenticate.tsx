@@ -79,8 +79,6 @@ export const CredentialForm = () => {
   const LoginError = searchParams.get("error");
   const eventSlug = searchParams.get("slug");
 
-  console.log({eventSlug})
-
   return (
     <Form action={formAction}>
       <Stack gap="6">
@@ -133,6 +131,7 @@ export const CredentialForm = () => {
               type="text"
               name="eventSlug"
               value={eventSlug ? eventSlug : ""}
+              readOnly
             />
           </Field>
         </VStack>

@@ -1,6 +1,8 @@
 "use client";
 import { Box, HStack, Icon, Text, chakra } from "@chakra-ui/react";
-import type { SecondaryNavItem } from "./data";
+// imported here, not passed from the server NavbarComponent: icons are
+// functions and can't cross the server → client boundary as props
+import { staticSecondaryNavItems } from "./data";
 import { useColorMode } from "../ui/color-mode";
 
 import { LuLogOut, LuMoon, LuSun } from "react-icons/lu";
@@ -9,10 +11,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { IconType } from "react-icons";
 import type { ReactNode } from "react";
-
-interface Props {
-  items?: SecondaryNavItem[];
-}
 
 const TabItem = ({
   icon,
@@ -46,7 +44,7 @@ const TabButton = chakra("button", {
   base: { cursor: "pointer", flex: { base: 1, md: "initial" } },
 });
 
-export const SecondaryNavigation = ({ items = [] }: Props) => {
+export const SecondaryNavigation = () => {
   const pathname = usePathname();
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -63,7 +61,7 @@ export const SecondaryNavigation = ({ items = [] }: Props) => {
       borderRadius={{ base: 0, md: "lg" }}
       bg={{ base: "bg", md: "bg.muted", _dark: { md: "gray.900" } }}
     >
-      {items.map(({ value, path, label, icon }) => (
+      {staticSecondaryNavItems.map(({ value, path, label, icon }) => (
         <Box asChild key={value} flex={{ base: 1, md: "initial" }}>
           <Link href={path} aria-current={pathname === path ? "page" : undefined}>
             <TabItem icon={icon} label={label} active={pathname === path} />

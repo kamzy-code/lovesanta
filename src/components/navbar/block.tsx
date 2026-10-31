@@ -1,5 +1,4 @@
 import { Box } from "@chakra-ui/react";
-import { staticSecondaryNavItems } from "./data";
 import { SecondaryNavigation } from "./secondary-navigation";
 
 /**
@@ -17,7 +16,7 @@ export const NavbarComponent = () => {
       display="flex"
       justifyContent="center"
     >
-      <SecondaryNavigation items={staticSecondaryNavItems} />
+      <SecondaryNavigation />
     </Box>
   );
 };
