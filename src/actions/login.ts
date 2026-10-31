@@ -101,10 +101,22 @@ export async function LoginAction(
       existingUser.email,
     );
 
-    await sendVerificationTokenMail(
-      verificationToken.identifier,
-      verificationToken.token,
-    );
+    try {
+      await sendVerificationTokenMail(
+        verificationToken.identifier,
+        verificationToken.token,
+      );
+    } catch (error) {
+      console.error("[LoginAction] verification email failed", error);
+      return {
+        success: false,
+        errors: {
+          submitError:
+            "Your email isn't verified yet and we couldn't send a new verification email. Please try again in a few minutes.",
+        },
+        values,
+      };
+    }
     return {
       success: false,
       errors: {

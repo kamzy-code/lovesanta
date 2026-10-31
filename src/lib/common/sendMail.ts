@@ -1,4 +1,4 @@
-"server-only";
+import "server-only";
 
 import { sendEmail } from "./mailTranspot";
 
@@ -118,7 +118,7 @@ If you didn’t create a Hangnex account, you can safely ignore this email.
 
 // RESET PASSWORD EMAIL AND HELPERS
 export const sendPasswordResetMail = async (to: string, token: string) => {
-  const subject = "Reset Your Passowrd";
+  const subject = "Reset Your Password";
   const verificationURL = `${baseURL}/auth/new-password?token=${token}`;
 
   const html = resetPasswordEmailHTML(verificationURL);

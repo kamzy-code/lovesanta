@@ -85,14 +85,30 @@ export async function SignupAction(
 
     const verificationToken = await generateVerificationToken(values.email);
     //Send Email
-    await sendWelcomeMail(values.email);
-    await sendVerificationTokenMail(verificationToken.identifier, verificationToken.token)
+    try {
+      await sendVerificationTokenMail(
+        verificationToken.identifier,
+        verificationToken.token,
+      );
+      await sendWelcomeMail(values.email);
+    } catch (error) {
+      // the account exists now, so retrying signup would fail with "email taken"
+      console.error("[signupAction] email failed", error);
+      return {
+        success: false,
+        errors: {
+          submitError:
+            "Your account was created, but we couldn't send the verification email. Log in later to get a new one.",
+        },
+        values,
+      };
+    }
   } catch (error) {
+    console.error("[signupAction]", error);
     return {
       success: false,
       errors: {
-        submitError:
-          "Something went worng, Please check your internet and try again.",
+        submitError: "Something went wrong. Please try again.",
       },
       values,
     };

@@ -4,6 +4,7 @@ import { get } from "~/lib/common/getFromFormData";
 import { sendPasswordResetMail } from "~/lib/common/sendMail";
 import { generatePasswordResetToken } from "~/lib/common/token";
 import { getUserByEmail } from "~/lib/db/users";
+import { EmailDeliveryError } from "~/lib/common/mailTranspot";
 import { resetPasswordSchema } from "~/schemas";
 
 interface ResetPasswordFormValues {
@@ -61,11 +62,14 @@ export const resetPasswordAction = async (
 
     return { success: true } as ResetPasswordFormState;
   } catch (error) {
+    console.error("[resetPasswordAction]", error);
     return {
       success: false,
       errors: {
         submitError:
-           "Something went wrong. Please check your internet connection and try again.",
+          error instanceof EmailDeliveryError
+            ? "We couldn't send the reset email right now. Please try again in a few minutes."
+            : "Something went wrong. Please try again.",
       },
       values: { email },
     } as ResetPasswordFormState;

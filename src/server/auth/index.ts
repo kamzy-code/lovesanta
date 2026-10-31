@@ -85,8 +85,11 @@ const {
   session: { strategy: "jwt" },
   events: {
     async createUser({ user }) {
+      // a failed welcome email must not block sign-up (e.g. first Google login)
       if (user.email) {
-        await sendWelcomeMail(user.email);
+        await sendWelcomeMail(user.email).catch((error) =>
+          console.error("[createUser] welcome email failed", error),
+        );
       }
     },
     
